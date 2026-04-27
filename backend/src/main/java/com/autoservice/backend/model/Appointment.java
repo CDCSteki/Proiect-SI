@@ -37,6 +37,12 @@ public class Appointment {
     @Column(nullable = false, length = 30)
     private AppointmentStatus status = AppointmentStatus.SCHEDULED;
 
+    @Column(length = 100)
+    private String serviceType;
+
+    @Column(length = 500)
+    private String notes;
+
     @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private RepairRecord repairRecord;
 
