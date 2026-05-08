@@ -7,6 +7,7 @@ import com.autoservice.backend.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +22,10 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
 
     @PostMapping
+    @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<AppointmentResponse> book(
             @RequestBody AppointmentRequest request,
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
         AppointmentResponse response = appointmentService.book(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -37,28 +38,27 @@ public class AppointmentController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('MECHANIC') or hasRole('MANAGER')")
     public ResponseEntity<AppointmentResponse> updateStatus(
             @PathVariable UUID id,
             @RequestParam AppointmentStatus status,
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
         return ResponseEntity.ok(appointmentService.updateStatus(id, status, userId));
     }
 
     @PatchMapping("/{id}/assign")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
     public ResponseEntity<AppointmentResponse> assignMechanic(
             @PathVariable UUID id,
-            @RequestParam UUID mechanicId
-    ) {
+            @RequestParam UUID mechanicId) {
         return ResponseEntity.ok(appointmentService.assignMechanic(id, mechanicId));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancel(
             @PathVariable UUID id,
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
         appointmentService.cancel(id, userId);
         return ResponseEntity.noContent().build();
