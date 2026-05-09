@@ -2,6 +2,7 @@ package com.autoservice.backend.repository;
 
 import com.autoservice.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,5 +10,18 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
+
     boolean existsByEmail(String email);
+
+    @Query("SELECT COUNT(u) FROM Client u")
+    Long countClients();
+
+    @Query("SELECT COUNT(u) FROM Mechanic u")
+    Long countMechanics();
+
+    @Query("SELECT COUNT(u) FROM Manager u")
+    Long countManagers();
+
+    @Query("SELECT COUNT(u) FROM Admin u")
+    Long countAdmins();
 }
