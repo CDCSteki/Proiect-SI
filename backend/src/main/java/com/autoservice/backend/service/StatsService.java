@@ -44,6 +44,13 @@ public AppointmentStatusResponse getAppointmentsByStatus() {
             .build();
 }
 
+public DailyAppointmentsResponse getAppointmentsCount(LocalDateTime start, LocalDateTime end) {
+    Long count = appointmentRepository.countByScheduledAtBetween(start, end);
+    return DailyAppointmentsResponse.builder()
+            .count(count != null ? count : 0L)
+            .build();
+}
+
 public RevenueResponse getTotalRevenue() {
     BigDecimal total = invoiceRepository.sumPaidInvoices();
     return RevenueResponse.builder()
@@ -55,15 +62,6 @@ public RevenueResponse getRevenueByPeriod(LocalDateTime start, LocalDateTime end
     BigDecimal revenue = invoiceRepository.sumPaidInvoicesByPeriod(start, end);
     return RevenueResponse.builder()
             .total(revenue != null ? revenue : BigDecimal.ZERO)
-            .build();
-}
-
-public DailyAppointmentsResponse getDailyAppointments(LocalDateTime date) {
-    LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
-    LocalDateTime endOfDay = startOfDay.plusDays(1);
-    Long count = appointmentRepository.countByScheduledAtBetween(startOfDay, endOfDay);
-    return DailyAppointmentsResponse.builder()
-            .count(count != null ? count : 0L)
             .build();
 }
 

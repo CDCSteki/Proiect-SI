@@ -46,10 +46,12 @@ public class StatsController {
         return ResponseEntity.ok(statsService.getRevenueByPeriod(startDate, endDate));
     }
 
-    @GetMapping("/daily-appointments")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<DailyAppointmentsResponse> getDailyAppointments(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
-        return ResponseEntity.ok(statsService.getDailyAppointments(date));
-    }
+    @GetMapping("/appointments-count")
+@PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+public ResponseEntity<DailyAppointmentsResponse> getAppointmentsCount(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+) {
+    return ResponseEntity.ok(statsService.getAppointmentsCount(startDate, endDate));
+}
 }
