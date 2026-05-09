@@ -20,8 +20,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
     Long countByScheduledAtBetween(LocalDateTime start, LocalDateTime end);
 
-    @Query("SELECT a.mechanic.id, COUNT(a) FROM Appointment a WHERE a.mechanic IS NOT NULL GROUP BY a.mechanic.id")
-    List<Object[]> countAppointmentsPerMechanic();
+    @Query("SELECT a.mechanic.id, a.mechanic.firstName, a.mechanic.lastName, COUNT(a) " +
+       "FROM Appointment a WHERE a.mechanic IS NOT NULL " +
+       "GROUP BY a.mechanic.id, a.mechanic.firstName, a.mechanic.lastName")
+List<Object[]> countAppointmentsPerMechanic();
 
     @Query("SELECT a FROM Appointment a WHERE a.car.id = :carId ORDER BY a.scheduledAt DESC")
     List<Appointment> findByCarId(@Param("carId") UUID carId);

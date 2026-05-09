@@ -4,6 +4,7 @@ import com.autoservice.backend.dto.AppointmentStatusResponse;
 import com.autoservice.backend.dto.DailyAppointmentsResponse;
 import com.autoservice.backend.dto.RevenueResponse;
 import com.autoservice.backend.dto.UserCountResponse;
+import com.autoservice.backend.dto.MechanicWorkloadResponse;
 import com.autoservice.backend.model.Appointment;
 import com.autoservice.backend.repository.AppointmentRepository;
 import com.autoservice.backend.repository.InvoiceRepository;
@@ -13,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -61,5 +65,20 @@ public DailyAppointmentsResponse getDailyAppointments(LocalDateTime date) {
     return DailyAppointmentsResponse.builder()
             .count(count != null ? count : 0L)
             .build();
+}
+
+public List<MechanicWorkloadResponse> getMechanicWorkload() {
+    List<Object[]> results = appointmentRepository.countAppointmentsPerMechanic();
+    List<MechanicWorkloadResponse> response = new ArrayList<>();
+    
+    for (Object[] row : results) {
+    response.add(MechanicWorkloadResponse.builder()
+            .mechanicId(UUID.fromString(row[0].toString()))
+            .mechanicName(row[1] + " " + row[2])
+            .appointmentsCount((Long) row[3])
+            .build());
+}
+    
+    return response;
 }
 }
