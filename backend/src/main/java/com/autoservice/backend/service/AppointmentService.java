@@ -2,6 +2,9 @@ package com.autoservice.backend.service;
 
 import com.autoservice.backend.dto.AppointmentRequest;
 import com.autoservice.backend.dto.AppointmentResponse;
+import com.autoservice.backend.exception.ConflictException;
+import com.autoservice.backend.exception.ForbiddenException;
+import com.autoservice.backend.exception.ResourceNotFoundException;
 import com.autoservice.backend.model.Appointment;
 import com.autoservice.backend.model.Car;
 import com.autoservice.backend.model.Client;
@@ -28,13 +31,13 @@ public class AppointmentService {
 
     public AppointmentResponse book(AppointmentRequest request, UUID clientId) {
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
 
         Car car = carRepository.findById(request.getCarId())
-                .orElseThrow(() -> new RuntimeException("Car not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Car not found"));
 
         if (!car.getClient().getId().equals(clientId)) {
-            throw new RuntimeException("This car does not belong to you");
+            throw new ForbiddenException("This car does not belong to you");
         }
 
         Appointment appointment = new Appointment();
@@ -60,11 +63,11 @@ public class AppointmentService {
                                             Appointment.AppointmentStatus status,
                                             UUID mechanicId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
 
         if (appointment.getMechanic() == null ||
                 !appointment.getMechanic().getId().equals(mechanicId)) {
-            throw new RuntimeException("You are not assigned to this appointment");
+            throw new ForbiddenException("You are not assigned to this appointment");
         }
 
         appointment.setStatus(status);
@@ -74,10 +77,10 @@ public class AppointmentService {
 
     public AppointmentResponse assignMechanic(UUID appointmentId, UUID mechanicId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
 
         Mechanic mechanic = mechanicRepository.findById(mechanicId)
-                .orElseThrow(() -> new RuntimeException("Mechanic not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mechanic not found"));
 
         appointment.setMechanic(mechanic);
         appointmentRepository.save(appointment);
@@ -86,15 +89,15 @@ public class AppointmentService {
 
     public void cancel(UUID appointmentId, UUID clientId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
 
         if (!appointment.getClient().getId().equals(clientId)) {
-            throw new RuntimeException("You can only cancel your own appointments");
+            throw new ForbiddenException("You can only cancel your own appointments");
         }
 
         if (appointment.getStatus() == Appointment.AppointmentStatus.IN_PROGRESS ||
                 appointment.getStatus() == Appointment.AppointmentStatus.DONE) {
-            throw new RuntimeException("Cannot cancel an appointment that is already in progress or done");
+            throw new ConflictException("Cannot cancel an appointment that is already in progress or done");
         }
 
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);

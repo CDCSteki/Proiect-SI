@@ -1,5 +1,7 @@
 package com.autoservice.backend.service;
 
+import com.autoservice.backend.exception.ForbiddenException;
+import com.autoservice.backend.exception.ResourceNotFoundException;
 import com.autoservice.backend.dto.CarRequest;
 import com.autoservice.backend.dto.CarResponse;
 import com.autoservice.backend.model.Car;
@@ -22,7 +24,7 @@ public class CarService {
 
     public CarResponse addCar(CarRequest request, UUID clientId) {
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
 
         Car car = new Car();
         car.setClient(client);
@@ -44,10 +46,10 @@ public class CarService {
 
     public void deleteCar(UUID carId, UUID clientId) {
         Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new RuntimeException("Car not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Car not found"));
 
         if (!car.getClient().getId().equals(clientId)) {
-            throw new RuntimeException("This car does not belong to you");
+            throw new ForbiddenException("This car does not belong to you");
         }
 
         carRepository.delete(car);

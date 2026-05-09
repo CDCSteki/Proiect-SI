@@ -1,5 +1,6 @@
 package com.autoservice.backend.service;
 
+import com.autoservice.backend.exception.ResourceNotFoundException;
 import com.autoservice.backend.dto.InvoiceResponse;
 import com.autoservice.backend.model.Invoice;
 import com.autoservice.backend.model.RepairRecord;
@@ -19,7 +20,7 @@ public class InvoiceService {
 
     public InvoiceResponse generate(UUID repairRecordId) {
         RepairRecord record = repairRecordRepository.findById(repairRecordId)
-                .orElseThrow(() -> new RuntimeException("Repair record not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Repair record not found"));
 
         Invoice invoice = new Invoice();
         invoice.setRepairRecord(record);
@@ -33,7 +34,7 @@ public class InvoiceService {
 
     public InvoiceResponse markAsPaid(UUID invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found"));
 
         invoice.setPaid(true);
         invoiceRepository.save(invoice);
@@ -42,7 +43,7 @@ public class InvoiceService {
 
     public InvoiceResponse getByRepairRecord(UUID repairRecordId) {
         Invoice invoice = invoiceRepository.findByRepairRecordId(repairRecordId)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found"));
         return mapToResponse(invoice);
     }
 

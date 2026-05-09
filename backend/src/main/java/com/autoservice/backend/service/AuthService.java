@@ -1,5 +1,7 @@
 package com.autoservice.backend.service;
 
+import com.autoservice.backend.exception.ConflictException;
+import com.autoservice.backend.exception.ResourceNotFoundException;
 import com.autoservice.backend.dto.AuthResponse;
 import com.autoservice.backend.dto.LoginRequest;
 import com.autoservice.backend.dto.RegisterRequest;
@@ -23,7 +25,7 @@ public class AuthService {
 
     public AuthResponse registerClient(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already in use");
+            throw new ConflictException("Email already in use");
         }
 
         Client client = new Client();
@@ -41,10 +43,10 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid credentials"));
         
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new ResourceNotFoundException("Invalid credentials");
         }
         
         String role = user.getClass().getSimpleName().toUpperCase();

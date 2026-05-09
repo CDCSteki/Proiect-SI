@@ -1,5 +1,6 @@
 package com.autoservice.backend.service;
 
+import com.autoservice.backend.exception.ResourceNotFoundException;
 import com.autoservice.backend.dto.PartRequest;
 import com.autoservice.backend.dto.RepairRecordRequest;
 import com.autoservice.backend.dto.RepairRecordResponse;
@@ -13,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,7 +27,7 @@ public class RepairRecordService {
 
     public RepairRecordResponse createRepairRecord(UUID appointmentId, RepairRecordRequest request) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
 
         RepairRecord record = new RepairRecord();
         record.setAppointment(appointment);
@@ -41,7 +41,7 @@ public class RepairRecordService {
 
     public RepairRecordResponse addPart(UUID repairRecordId, PartRequest request) {
         RepairRecord record = repairRecordRepository.findById(repairRecordId)
-                .orElseThrow(() -> new RuntimeException("Repair record not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Repair record not found"));
 
         Part part = new Part();
         part.setRepairRecord(record);
@@ -64,7 +64,7 @@ public class RepairRecordService {
 
     public RepairRecordResponse getByAppointmentId(UUID appointmentId) {
         RepairRecord record = repairRecordRepository.findByAppointmentId(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Repair record not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Repair record not found"));
         return mapToResponse(record);
     }
 
