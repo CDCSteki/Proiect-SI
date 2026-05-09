@@ -3,6 +3,7 @@ package com.autoservice.backend.repository;
 import com.autoservice.backend.model.Appointment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -21,4 +22,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
     @Query("SELECT a.mechanic.id, COUNT(a) FROM Appointment a WHERE a.mechanic IS NOT NULL GROUP BY a.mechanic.id")
     List<Object[]> countAppointmentsPerMechanic();
+
+    @Query("SELECT a FROM Appointment a WHERE a.car.id = :carId ORDER BY a.scheduledAt DESC")
+    List<Appointment> findByCarId(@Param("carId") UUID carId);
 }
