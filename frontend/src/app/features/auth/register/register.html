@@ -1,1 +1,93 @@
-<p>register works!</p>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="logo">
+        <span class="logo-icon">⚙</span>
+        <span class="logo-text">AutoService</span>
+      </div>
+      <h2>Create your account</h2>
+      <p>Join AutoPulse today</p>
+    </div>
+
+    <form (ngSubmit)="onRegister()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" [(ngModel)]="firstName" name="firstName" placeholder="Alex" />
+          @if (firstNameError) {
+            <span class="field-error">{{ firstNameError }}</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" [(ngModel)]="lastName" name="lastName" placeholder="Ionescu" />
+          @if (lastNameError) {
+            <span class="field-error">{{ lastNameError }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email address</label>
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="alex@example.com"
+          required
+        />
+        @if (emailError) {
+          <span class="field-error">{{ emailError }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="0721123456" />
+        @if (phoneError) {
+          <span class="field-error">{{ phoneError }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input
+          type="password"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          placeholder="••••••••"
+          required
+        />
+        @if (passwordError) {
+          <span class="field-error">{{ passwordError }}</span>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <div class="error-message">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        {{ loading ? 'Creating account...' : 'Create account →' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>
