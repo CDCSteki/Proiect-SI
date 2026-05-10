@@ -21,6 +21,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             LocalDateTime from,
             LocalDateTime to);
 
+    List<Appointment> findByMechanicIsNull();
+
+    List<Appointment> findByScheduledAtBetweenOrderByScheduledAt(
+            LocalDateTime from,
+            LocalDateTime to);
+
     Long countByStatus(Appointment.AppointmentStatus status);
 
     Long countByScheduledAtBetween(LocalDateTime start, LocalDateTime end);

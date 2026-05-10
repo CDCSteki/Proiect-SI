@@ -5,12 +5,15 @@ import com.autoservice.backend.dto.AppointmentResponse;
 import com.autoservice.backend.model.Appointment.AppointmentStatus;
 import com.autoservice.backend.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +48,20 @@ public class AppointmentController {
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
         return ResponseEntity.ok(appointmentService.updateStatus(id, status, userId));
+    }
+
+    @GetMapping("/unassigned")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ResponseEntity<List<AppointmentResponse>> getUnassigned() {
+        return ResponseEntity.ok(appointmentService.getUnassignedAppointments());
+    }
+
+    @GetMapping("/calendar")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ResponseEntity<List<AppointmentResponse>> getCalendar(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
+        return ResponseEntity.ok(appointmentService.getCalendar(from, to));
     }
 
     @PatchMapping("/{id}/assign")

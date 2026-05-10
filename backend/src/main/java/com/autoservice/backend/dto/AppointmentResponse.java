@@ -11,6 +11,7 @@ public class AppointmentResponse {
     private UUID clientId;
     private UUID mechanicId;
     private String serviceType;
+    private String mechanicName;
     private String notes;
     private LocalDateTime scheduledAt;
     private AppointmentStatus status;
