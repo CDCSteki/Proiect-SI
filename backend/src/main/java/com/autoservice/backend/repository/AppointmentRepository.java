@@ -16,15 +16,30 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
     List<Appointment> findByMechanicId(UUID mechanicId);
 
+    List<Appointment> findByMechanicIdAndScheduledAtBetweenOrderByScheduledAt(
+            UUID mechanicId,
+            LocalDateTime from,
+            LocalDateTime to);
+
     Long countByStatus(Appointment.AppointmentStatus status);
 
     Long countByScheduledAtBetween(LocalDateTime start, LocalDateTime end);
 
     @Query("SELECT a.mechanic.id, a.mechanic.firstName, a.mechanic.lastName, COUNT(a) " +
-       "FROM Appointment a WHERE a.mechanic IS NOT NULL " +
-       "GROUP BY a.mechanic.id, a.mechanic.firstName, a.mechanic.lastName")
-List<Object[]> countAppointmentsPerMechanic();
+            "FROM Appointment a WHERE a.mechanic IS NOT NULL " +
+            "GROUP BY a.mechanic.id, a.mechanic.firstName, a.mechanic.lastName")
+    List<Object[]> countAppointmentsPerMechanic();
 
     @Query("SELECT a FROM Appointment a WHERE a.car.id = :carId ORDER BY a.scheduledAt DESC")
     List<Appointment> findByCarId(@Param("carId") UUID carId);
+
+    @Query("""
+            SELECT COUNT(a) > 0 FROM Appointment a
+            WHERE a.mechanic.id = :mechanicId
+            AND a.scheduledAt = :scheduledAt
+            AND a.status NOT IN ('CANCELLED', 'DONE')
+            """)
+    boolean existsConflict(
+            @Param("mechanicId") UUID mechanicId,
+            @Param("scheduledAt") LocalDateTime scheduledAt);
 }

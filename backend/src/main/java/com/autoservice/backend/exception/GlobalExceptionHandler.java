@@ -17,8 +17,7 @@ public class GlobalExceptionHandler {
                 "status", 404,
                 "error", "NOT_FOUND",
                 "message", ex.getMessage(),
-                "timestamp", LocalDateTime.now()
-        ));
+                "timestamp", LocalDateTime.now()));
     }
 
     @ExceptionHandler(ForbiddenException.class)
@@ -27,8 +26,7 @@ public class GlobalExceptionHandler {
                 "status", 403,
                 "error", "FORBIDDEN",
                 "message", ex.getMessage(),
-                "timestamp", LocalDateTime.now()
-        ));
+                "timestamp", LocalDateTime.now()));
     }
 
     @ExceptionHandler(ConflictException.class)
@@ -37,8 +35,7 @@ public class GlobalExceptionHandler {
                 "status", 409,
                 "error", "CONFLICT",
                 "message", ex.getMessage(),
-                "timestamp", LocalDateTime.now()
-        ));
+                "timestamp", LocalDateTime.now()));
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -47,7 +44,15 @@ public class GlobalExceptionHandler {
                 "status", 500,
                 "error", "INTERNAL_SERVER_ERROR",
                 "message", ex.getMessage(),
-                "timestamp", LocalDateTime.now()
-        ));
+                "timestamp", LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<?> handleBadRequest(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "status", 400,
+                "error", "BAD_REQUEST",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now()));
     }
 }
