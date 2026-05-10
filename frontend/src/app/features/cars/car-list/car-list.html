@@ -1,1 +1,95 @@
-<p>car-list works!</p>
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1>My Cars</h1>
+        <p class="subtitle">Manage your registered vehicles</p>
+      </div>
+      <button class="btn-primary" (click)="toggleAddForm()">
+        {{ showAddForm ? 'Cancel' : '+ Add Car' }}
+      </button>
+    </div>
+
+    @if (showAddForm) {
+      <div class="add-form-card">
+        <h3>Add New Car</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>License Plate</label>
+            <input
+              type="text"
+              [(ngModel)]="newCar.licensePlate"
+              placeholder="B-123-XYZ"
+            />
+          </div>
+          <div class="form-group">
+            <label>Make</label>
+            <input
+              type="text"
+              [(ngModel)]="newCar.make"
+              placeholder="Dacia"
+            />
+          </div>
+          <div class="form-group">
+            <label>Model</label>
+            <input
+              type="text"
+              [(ngModel)]="newCar.model"
+              placeholder="Logan"
+            />
+          </div>
+          <div class="form-group">
+            <label>Year</label>
+            <input
+              type="number"
+              [(ngModel)]="newCar.year"
+              placeholder="2020"
+              min="1990"
+              [max]="2026"
+            />
+          </div>
+        </div>
+
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
+
+        <button class="btn-primary" (click)="addCar()" [disabled]="addLoading">
+          {{ addLoading ? 'Adding...' : 'Add Car' }}
+        </button>
+      </div>
+    }
+
+    @if (loading) {
+      <div class="loading">Loading...</div>
+    } @else if (cars.length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">🚗</span>
+        <h3>No cars registered yet</h3>
+        <p>Add your first car to start booking appointments</p>
+        <button class="btn-primary" (click)="toggleAddForm()">+ Add Car</button>
+      </div>
+    } @else {
+      <div class="cars-grid">
+        @for (car of cars; track car.id) {
+          <div class="car-card">
+            <div class="car-card-header">
+              <div class="car-icon">🚗</div>
+              <div class="car-info">
+                <h3>{{ car.make }} {{ car.model }}</h3>
+                <p class="car-year">{{ car.year }}</p>
+              </div>
+            </div>
+            <div class="car-plate">
+              <span class="plate-label">License Plate</span>
+              <span class="plate-value">{{ car.licensePlate }}</span>
+            </div>
+            <div class="car-actions">
+              <button class="btn-danger" (click)="deleteCar(car.id)">Delete</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</app-main-layout>

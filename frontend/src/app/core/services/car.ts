@@ -11,6 +11,13 @@ export interface Car {
   clientId: string;
 }
 
+export interface CarRequest {
+  licensePlate: string;
+  make: string;
+  model: string;
+  year: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CarService {
 
@@ -22,7 +29,7 @@ export class CarService {
     return this.http.get<Car[]>(`${this.apiUrl}/cars/my`);
   }
 
-  addCar(data: any): Observable<Car> {
+  addCar(data: CarRequest): Observable<Car> {
     return this.http.post<Car>(`${this.apiUrl}/cars`, data);
   }
 
