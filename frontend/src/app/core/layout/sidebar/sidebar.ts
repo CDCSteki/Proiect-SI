@@ -17,8 +17,6 @@ interface NavItem {
   styleUrl: './sidebar.scss'
 })
 export class Sidebar implements OnInit {
-
-  collapsed = false;
   navItems: NavItem[] = [];
 
   constructor(
@@ -66,10 +64,6 @@ export class Sidebar implements OnInit {
       default:
         return common;
     }
-  }
-
-  toggleCollapse(): void {
-    this.collapsed = !this.collapsed;
   }
 
   toggleTheme(): void {

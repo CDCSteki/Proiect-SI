@@ -1,1 +1,114 @@
-<p>client-dashboard works!</p>
+<app-main-layout>
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <div>
+        <p class="greeting">Good morning,</p>
+        <h1>{{ userName }}</h1>
+      </div>
+      <a routerLink="/appointments/new" class="btn-primary">+ New Appointment</a>
+    </div>
+
+    @if (loading) {
+      <div class="loading">Loading...</div>
+    } @else {
+
+      @if (activeAppointment) {
+        <div class="active-card">
+          <div class="active-card-header">
+            <div>
+              <p class="section-label">Active Repair</p>
+              <h3>{{ activeAppointment.car.make }} {{ activeAppointment.car.model }} · {{ activeAppointment.car.licensePlate }}</h3>
+              <p class="active-meta">{{ activeAppointment.serviceType }}
+                @if (activeAppointment.mechanicName) {
+                  · Mechanic: {{ activeAppointment.mechanicName }}
+                }
+              </p>
+            </div>
+            <span class="badge" [class]="getStatusClass(activeAppointment.status)">
+              {{ getStatusLabel(activeAppointment.status) }}
+            </span>
+          </div>
+          <div class="timeline">
+            <div class="timeline-step" [class.done]="true">
+              <div class="dot"></div>
+              <div>
+                <p class="step-label">Scheduled</p>
+                <p class="step-time">{{ activeAppointment.scheduledAt | date:'dd MMM, HH:mm' }}</p>
+              </div>
+            </div>
+            <div class="timeline-step" [class.done]="activeAppointment.status === 'IN_PROGRESS' || activeAppointment.status === 'DONE'">
+              <div class="dot"></div>
+              <div>
+                <p class="step-label">In Progress</p>
+              </div>
+            </div>
+            <div class="timeline-step" [class.done]="activeAppointment.status === 'DONE' || activeAppointment.status === 'READY_FOR_PICKUP'">
+              <div class="dot"></div>
+              <div>
+                <p class="step-label">Ready for Pickup</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="empty-card">
+          <p>No active appointments.</p>
+          <a routerLink="/appointments/new" class="btn-primary">Book one now</a>
+        </div>
+      }
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Recent Appointments</h2>
+          <a routerLink="/appointments" class="btn-secondary">View all</a>
+        </div>
+
+        @if (recentAppointments.length === 0) {
+          <div class="empty-state">No past appointments yet.</div>
+        } @else {
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Car</th>
+                  <th>Service</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (appt of recentAppointments; track appt.id) {
+                  <tr>
+                    <td>{{ appt.scheduledAt | date:'dd MMM yyyy' }}</td>
+                    <td>{{ appt.car.make }} {{ appt.car.model }}</td>
+                    <td>{{ appt.serviceType }}</td>
+                    <td>
+                      <span class="badge" [class]="getStatusClass(appt.status)">
+                        {{ getStatusLabel(appt.status) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <div class="quick-actions">
+        <a routerLink="/cars" class="action-card">
+          <span class="action-icon">🚗</span>
+          <span>My Cars</span>
+        </a>
+        <a routerLink="/appointments/new" class="action-card">
+          <span class="action-icon">📅</span>
+          <span>New Appointment</span>
+        </a>
+        <a routerLink="/profile" class="action-card">
+          <span class="action-icon">👤</span>
+          <span>Profile</span>
+        </a>
+      </div>
+    }
+  </div>
+</app-main-layout>

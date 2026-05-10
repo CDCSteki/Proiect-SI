@@ -11,9 +11,11 @@
   transition: margin-left 0.3s;
   min-height: 100vh;
   overflow-y: auto;
+  width: calc(100% - 240px);
 
   @media (max-width: 768px) {
     margin-left: 0;
     padding: 16px;
+    width: 100%;
   }
 }

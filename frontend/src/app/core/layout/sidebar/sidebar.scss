@@ -20,13 +20,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 16px;
+  padding: 20px 12px;
   border-bottom: 1px solid var(--border);
+  min-height: 64px;
+  gap: 8px;
 
   .logo {
     display: flex;
     align-items: center;
     gap: 10px;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
 
     .logo-icon {
       width: 32px;
@@ -45,6 +50,7 @@
       font-weight: 600;
       color: var(--text);
       white-space: nowrap;
+      overflow: hidden;
     }
   }
 }
@@ -57,6 +63,7 @@
   cursor: pointer;
   padding: 4px 8px;
   font-size: 12px;
+  flex-shrink: 0;
 
   &:hover {
     color: var(--text);

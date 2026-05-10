@@ -1,23 +1,16 @@
-<div class="sidebar" [class.collapsed]="collapsed">
+<div class="sidebar">
   <div class="sidebar-header">
     <div class="logo">
       <span class="logo-icon">⚙</span>
-      @if (!collapsed) {
-        <span class="logo-text">AutoPulse</span>
-      }
+      <span class="logo-text">AutoPulse</span>
     </div>
-    <button class="collapse-btn" (click)="toggleCollapse()">
-      {{ collapsed ? '→' : '←' }}
-    </button>
   </div>
 
   <nav class="sidebar-nav">
     @for (item of navItems; track item.path) {
       <a [routerLink]="item.path" routerLinkActive="active" class="nav-item" [title]="item.label">
         <span class="nav-icon">{{ item.icon }}</span>
-        @if (!collapsed) {
-          <span class="nav-label">{{ item.label }}</span>
-        }
+        <span class="nav-label">{{ item.label }}</span>
       </a>
     }
   </nav>
@@ -25,15 +18,11 @@
   <div class="sidebar-footer">
     <button class="nav-item theme-btn" (click)="toggleTheme()">
       <span class="nav-icon">{{ themeService.isDark() ? '☀️' : '🌙' }}</span>
-      @if (!collapsed) {
-        <span class="nav-label">{{ themeService.isDark() ? 'Light Mode' : 'Dark Mode' }}</span>
-      }
+      <span class="nav-label">{{ themeService.isDark() ? 'Light Mode' : 'Dark Mode' }}</span>
     </button>
     <button class="nav-item logout-btn" (click)="logout()">
       <span class="nav-icon">🚪</span>
-      @if (!collapsed) {
-        <span class="nav-label">Logout</span>
-      }
+      <span class="nav-label">Logout</span>
     </button>
   </div>
 </div>
