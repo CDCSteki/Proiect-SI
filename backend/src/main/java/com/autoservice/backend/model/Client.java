@@ -12,9 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 public class Client extends User {
  
-    @Column(length = 20)
-    private String phoneNumber;
- 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Car> cars;
  

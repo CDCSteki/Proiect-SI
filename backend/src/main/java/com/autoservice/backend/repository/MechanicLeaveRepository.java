@@ -18,6 +18,7 @@ public interface MechanicLeaveRepository extends JpaRepository<MechanicLeave, UU
     List<MechanicLeave> findByStatus(MechanicLeave.LeaveStatus status);
 
     List<MechanicLeave> findByMechanicIdAndStatus(UUID mechanicId, MechanicLeave.LeaveStatus status);
+    
 
     @Query("""
             SELECT ml FROM MechanicLeave ml

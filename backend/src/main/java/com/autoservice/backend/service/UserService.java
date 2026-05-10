@@ -51,6 +51,7 @@ public class UserService {
             return mapToResponse(user);
         }
 
+        // Verifici relatiile
         if (currentRole.equals("CLIENT")) {
             Client client = (Client) user;
             if (client.getCars() != null && !client.getCars().isEmpty()) {
@@ -67,51 +68,33 @@ public class UserService {
                 throw new ConflictException("Cannot change role: mechanic has appointments assigned.");
             }
         }
-        // Delete from current role table
+
+        // Delete din tabelul vechi cu SQL nativ
         switch (currentRole) {
-            case "CLIENT" -> clientRepository.deleteById(userId);
-            case "MECHANIC" -> mechanicRepository.deleteById(userId);
-            case "MANAGER" -> managerRepository.deleteById(userId);
-            case "ADMIN" -> adminRepository.deleteById(userId);
+            case "CLIENT" -> clientRepository.deleteByIdNative(userId);
+            case "MECHANIC" -> mechanicRepository.deleteByIdNative(userId);
+            case "MANAGER" -> managerRepository.deleteByIdNative(userId);
+            case "ADMIN" -> adminRepository.deleteByIdNative(userId);
         }
 
-        // Create in new role table
+        // Insert in tabelul nou cu SQL nativ
         switch (newRole) {
-            case "CLIENT" -> {
-                Client client = new Client();
-                copyBaseFields(user, client);
-                clientRepository.save(client);
-            }
-            case "MECHANIC" -> {
-                Mechanic mechanic = new Mechanic();
-                copyBaseFields(user, mechanic);
-                mechanicRepository.save(mechanic);
-            }
-            case "MANAGER" -> {
-                Manager manager = new Manager();
-                copyBaseFields(user, manager);
-                managerRepository.save(manager);
-            }
-            case "ADMIN" -> {
-                Admin admin = new Admin();
-                copyBaseFields(user, admin);
-                admin.setAccessLevel(1);
-                adminRepository.save(admin);
-            }
+            case "CLIENT" -> clientRepository.insertNative(userId);
+            case "MECHANIC" -> mechanicRepository.insertNative(
+                    userId,
+                    request.getSpecialization() != null ? request.getSpecialization() : "General",
+                    request.getHourlyRate() != null ? request.getHourlyRate() : 0.0);
+            case "MANAGER" -> managerRepository.insertNative(
+                    userId,
+                    request.getDepartment() != null ? request.getDepartment() : "General");
+            case "ADMIN" -> adminRepository.insertNative(
+                    userId,
+                    request.getAccessLevel() != null ? request.getAccessLevel() : 1);
         }
 
         User updated = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return mapToResponse(updated);
-    }
-
-    private void copyBaseFields(User source, User target) {
-        target.setId(source.getId());
-        target.setFirstName(source.getFirstName());
-        target.setLastName(source.getLastName());
-        target.setEmail(source.getEmail());
-        target.setPasswordHash(source.getPasswordHash());
-        target.setActive(source.isActive());
     }
 
     private UserResponse mapToResponse(User user) {

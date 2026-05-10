@@ -37,8 +37,8 @@ public class ProfileService {
         if (request.getLastName() != null) {
             user.setLastName(request.getLastName());
         }
-        if (request.getPhone() != null && user instanceof Client client) {
-            client.setPhoneNumber(request.getPhone());
+        if (request.getPhone() != null) {
+            user.setPhoneNumber(request.getPhone());
         }
 
         userRepository.save(user);
