@@ -56,6 +56,13 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getUnassignedAppointments());
     }
 
+    @GetMapping("/available-slots")
+    @PreAuthorize("hasAnyRole('CLIENT', 'MANAGER', 'ADMIN')")
+    public ResponseEntity<List<String>> getAvailableSlots(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
+        return ResponseEntity.ok(appointmentService.getAvailableSlots(date));
+    }
+
     @GetMapping("/calendar")
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<List<AppointmentResponse>> getCalendar(

@@ -15,6 +15,7 @@ import com.autoservice.backend.repository.ClientRepository;
 import com.autoservice.backend.repository.MechanicRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.Map;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +41,6 @@ public class AppointmentService {
         if (!car.getClient().getId().equals(clientId)) {
             throw new ForbiddenException("This car does not belong to you");
         }
-
         Appointment appointment = new Appointment();
         appointment.setClient(client);
         appointment.setCar(car);
@@ -57,6 +57,21 @@ public class AppointmentService {
         return appointmentRepository.findByClientId(clientId)
                 .stream()
                 .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getAvailableSlots(LocalDateTime date) {
+        List<Object[]> counts = appointmentRepository.countAppointmentsPerSlot(date);
+        Map<String, Long> slotCounts = counts.stream()
+                .collect(Collectors.toMap(
+                        obj -> ((LocalDateTime) obj[0]).toLocalTime().toString().substring(0, 5),
+                        obj -> (Long) obj[1]));
+
+        List<String> allSlots = List.of("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
+                "16:00");
+
+        return allSlots.stream()
+                .filter(slot -> slotCounts.getOrDefault(slot, 0L) < 6)
                 .collect(Collectors.toList());
     }
 
@@ -124,9 +139,13 @@ public class AppointmentService {
         AppointmentResponse response = new AppointmentResponse();
         response.setId(appointment.getId());
         response.setClientId(appointment.getClient().getId());
-        response.setMechanicName(
-                appointment.getMechanic().getFirstName() + " " +
-                        appointment.getMechanic().getLastName());
+        if (appointment.getMechanic() != null) {
+            response.setMechanicId(appointment.getMechanic().getId());
+            response.setMechanicName(
+                    appointment.getMechanic().getFirstName() + " " +
+                    appointment.getMechanic().getLastName()
+            );
+        }
         response.setScheduledAt(appointment.getScheduledAt());
         response.setServiceType(appointment.getServiceType());
         response.setNotes(appointment.getNotes());

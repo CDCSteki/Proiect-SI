@@ -19,6 +19,12 @@ export interface Appointment {
     year: number;
   };
 }
+export interface AppointmentRequest {
+  carId: string;
+  scheduledAt: string;
+  serviceType: string;
+  notes?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AppointmentService {
@@ -53,5 +59,11 @@ export class AppointmentService {
 
   getMyTasks(from: string, to: string): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/tasks?from=${from}&to=${to}`);
+  }
+
+  getAvailableSlots(date: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/appointments/available-slots`, {
+      params: { date }
+    });
   }
 }
