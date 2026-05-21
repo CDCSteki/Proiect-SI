@@ -62,7 +62,7 @@
 
     @if (loading()) {
       <div class="loading">Loading...</div>
-    } @else if (cars.length === 0) {
+    } @else if (cars().length === 0) {
       <div class="empty-state">
         <span class="empty-icon">🚗</span>
         <h3>No cars registered yet</h3>
