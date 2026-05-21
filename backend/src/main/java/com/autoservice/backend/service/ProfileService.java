@@ -5,7 +5,6 @@ import com.autoservice.backend.dto.UpdateProfileRequest;
 import com.autoservice.backend.dto.UserResponse;
 import com.autoservice.backend.exception.BadRequestException;
 import com.autoservice.backend.exception.ResourceNotFoundException;
-import com.autoservice.backend.model.Client;
 import com.autoservice.backend.model.User;
 import com.autoservice.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

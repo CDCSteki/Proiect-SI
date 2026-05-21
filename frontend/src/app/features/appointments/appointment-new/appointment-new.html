@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    @if (carsLoading) {
+    @if (carsLoading()) {
       <div class="loading">Loading your cars...</div>
     } @else if (cars.length === 0) {
       <div class="empty-state">
@@ -21,7 +21,7 @@
         <div class="form-section">
           <h3>1. Select Your Car</h3>
           <div class="cars-grid">
-            @for (car of cars; track car.id) {
+            @for (car of cars(); track car.id) {
               <div
                 class="car-option"
                 [class.selected]="form.carId === car.id"
@@ -70,7 +70,7 @@
                 @if (availableSlots.length === 0 && form.dropoffDate) {
                   <option value="">Full - Select another day</option>
                 }
-                @for (slot of availableSlots; track slot) {
+                @for (slot of availableSlots(); track slot) {
                   <option [value]="slot">{{ slot }}</option>
                 }
               </select>
@@ -87,14 +87,14 @@
           </div>
         </div>
 
-        @if (errorMessage) {
-          <div class="error-message">{{ errorMessage }}</div>
+        @if (errorMessage()) {
+          <div class="error-message">{{ errorMessage() }}</div>
         }
 
         <div class="form-actions">
           <button class="btn-secondary" (click)="cancel()">Cancel</button>
-          <button class="btn-primary" (click)="onSubmit()" [disabled]="loading">
-            {{ loading ? 'Confirming...' : 'Confirm Booking' }}
+          <button class="btn-primary" (click)="onSubmit()" [disabled]="loading()">
+            {{ loading() ? 'Confirming...' : 'Confirm Booking' }}
           </button>
         </div>
       </div>

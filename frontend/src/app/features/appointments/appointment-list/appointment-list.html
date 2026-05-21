@@ -1,1 +1,87 @@
-<p>appointment-list works!</p>
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1>My Appointments</h1>
+        <p class="subtitle">View and manage your service appointments</p>
+      </div>
+      <a routerLink="/appointments/new" class="btn-primary">+ New Appointment</a>
+    </div>
+
+    <div class="filters">
+      @for (status of statuses; track status) {
+        <button
+          class="filter-btn"
+          [class.active]="selectedStatus() === status"
+          (click)="setFilter(status)"
+        >
+          {{ status === 'ALL' ? 'All' : getStatusLabel(status) }}
+        </button>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading...</div>
+    } @else if (filteredAppointments().length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">📅</span>
+        <h3>No appointments found</h3>
+        <p>{{ selectedStatus() === 'ALL' ? 'You have no appointments yet.' : 'No appointments with this status.' }}</p>
+        @if (selectedStatus() === 'ALL') {
+          <a routerLink="/appointments/new" class="btn-primary">Book one now</a>
+        }
+      </div>
+    } @else {
+      <div class="appointments-list">
+        @for (appt of filteredAppointments(); track appt.id) {
+          <div class="appointment-card">
+            <div class="card-header">
+              <div class="car-info">
+                <span class="car-icon">🚗</span>
+                <div>
+                  <h3>{{ appt.car.make }} {{ appt.car.model }}</h3>
+                  <p class="car-plate">{{ appt.car.licensePlate }}</p>
+                </div>
+              </div>
+              <span class="badge" [class]="getStatusClass(appt.status)">
+                {{ getStatusLabel(appt.status) }}
+              </span>
+            </div>
+
+            <div class="card-body">
+              <div class="info-row">
+                <span class="info-label">Service</span>
+                <span class="info-value">{{ appt.serviceType }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Date</span>
+                <span class="info-value">{{ appt.scheduledAt | date:'dd MMM yyyy, HH:mm' }}</span>
+              </div>
+              @if (appt.mechanicName) {
+                <div class="info-row">
+                  <span class="info-label">Mechanic</span>
+                  <span class="info-value">{{ appt.mechanicName }}</span>
+                </div>
+              }
+              @if (appt.notes) {
+                <div class="info-row">
+                  <span class="info-label">Notes</span>
+                  <span class="info-value">{{ appt.notes }}</span>
+                </div>
+              }
+            </div>
+
+            @if (canCancel(appt.status)) {
+              <div class="card-footer">
+                <button class="btn-danger" (click)="cancelAppointment(appt.id)">
+                  Cancel Appointment
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+  <app-confirm-dialog />
+</app-main-layout>
