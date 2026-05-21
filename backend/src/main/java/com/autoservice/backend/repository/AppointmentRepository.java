@@ -57,4 +57,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
                             GROUP BY a.scheduledAt
                         """)
         List<Object[]> countAppointmentsPerSlot(@Param("date") LocalDateTime date);
+
+        @Query("""
+                        SELECT CAST(a.scheduledAt AS date), COUNT(a)
+                        FROM Appointment a
+                        WHERE a.scheduledAt >= :start
+                        AND a.scheduledAt < :end
+                        AND a.status != 'CANCELLED'
+                        GROUP BY CAST(a.scheduledAt AS date)
+                        """)
+        List<Object[]> countAppointmentsPerDay(
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 }

@@ -1,15 +1,13 @@
 <app-main-layout>
   <div class="page">
     <div class="page-header">
-      <div>
-        <h1>Book Appointment</h1>
-        <p class="subtitle">Schedule a new service for your car</p>
-      </div>
+      <h1>Book Appointment</h1>
+      <p class="subtitle">Schedule a new service for your car</p>
     </div>
 
     @if (carsLoading()) {
       <div class="loading">Loading your cars...</div>
-    } @else if (cars.length === 0) {
+    } @else if (cars().length === 0) {
       <div class="empty-state">
         <span class="empty-icon">🚗</span>
         <h3>No cars registered</h3>
@@ -18,6 +16,7 @@
       </div>
     } @else {
       <div class="form-card">
+        <!-- STEP 1: Car -->
         <div class="form-section">
           <h3>1. Select Your Car</h3>
           <div class="cars-grid">
@@ -37,54 +36,91 @@
           </div>
         </div>
 
+        <!-- STEP 2: Service -->
         <div class="form-section">
-          <h3>2. Service Details</h3>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Service Type</label>
-              <select [(ngModel)]="form.serviceType" name="serviceType">
-                <option value="">Select service...</option>
-                @for (type of serviceTypes; track type) {
-                  <option [value]="type">{{ type }}</option>
-                }
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Drop-off Date</label>
-              <input
-                type="date"
-                [(ngModel)]="form.dropoffDate"
-                (change)="onDateChange()"
-                name="dropoffDate"
-                [min]="minDate"
-              />
-            </div>
-
-            <div class="form-group">
-              <label>Drop-off Time</label>
-              <select
-                [(ngModel)]="form.dropoffTime"
-                name="dropoffTime"
-                [disabled]="!form.dropoffDate"
+          <h3>2. Service Type</h3>
+          <div class="service-grid">
+            @for (type of serviceTypes; track type) {
+              <div
+                class="service-option"
+                [class.selected]="form.serviceType === type"
+                (click)="form.serviceType = type"
               >
-                @if (availableSlots.length === 0 && form.dropoffDate) {
-                  <option value="">Full - Select another day</option>
-                }
-                @for (slot of availableSlots(); track slot) {
-                  <option [value]="slot">{{ slot }}</option>
-                }
-              </select>
+                {{ type }}
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- STEP 3: Calendar -->
+        <div class="form-section">
+          <h3>3. Select Date</h3>
+          <div class="calendar">
+            <div class="calendar-header">
+              <button class="cal-nav" (click)="prevMonth()">←</button>
+              <span class="month-label">{{ monthLabel() }}</span>
+              <button class="cal-nav" (click)="nextMonth()">→</button>
+            </div>
+            <div class="calendar-weekdays">
+              @for (day of ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; track day) {
+                <div class="weekday">{{ day }}</div>
+              }
+            </div>
+            <div class="calendar-grid">
+              @for (day of calendarDays(); track day.date || $index) {
+                <div
+                  class="cal-day"
+                  [class.empty]="day.empty"
+                  [class.past]="day.past"
+                  [class.fully-booked]="day.fullyBooked"
+                  [class.selected]="day.date !== '' && selectedDate() === day.date"
+                  [class.available]="!day.empty && !day.past && !day.fullyBooked"
+                  (click)="selectDate(day)"
+                >
+                  @if (!day.empty) {
+                    {{ day.day }}
+                  }
+                </div>
+              }
+            </div>
+            <div class="calendar-legend">
+              <span class="legend-item"><span class="legend-dot available"></span> Available</span>
+              <span class="legend-item"><span class="legend-dot past"></span> Past</span>
+              <span class="legend-item"><span class="legend-dot fully-booked"></span> Fully booked</span>
+              <span class="legend-item"><span class="legend-dot selected"></span> Selected</span>
             </div>
           </div>
-          <div class="form-group">
-            <label>Notes (optional)</label>
-            <textarea
-              [(ngModel)]="form.notes"
-              name="notes"
-              placeholder="Describe the issue or any additional information..."
-              rows="3"
-            ></textarea>
+        </div>
+
+        <!-- STEP 4: Time -->
+        @if (selectedDate()) {
+          <div class="form-section">
+            <h3>4. Select Time</h3>
+            <div class="time-grid">
+              @for (slot of allSlots; track slot) {
+                <div
+                  class="time-slot"
+                  [class.available]="isSlotAvailable(slot)"
+                  [class.unavailable]="!isSlotAvailable(slot)"
+                  [class.selected]="selectedTime() === slot"
+                  (click)="selectTime(slot)"
+                >
+                  {{ slot }}
+                </div>
+              }
+            </div>
           </div>
+        }
+
+        <!-- STEP 5: Notes -->
+        <div class="form-section">
+          <h3>5. Additional Notes</h3>
+          <textarea
+            [(ngModel)]="form.notes"
+            name="notes"
+            placeholder="Describe the issue or any additional information..."
+            rows="3"
+          ></textarea>
         </div>
 
         @if (errorMessage()) {
@@ -94,7 +130,7 @@
         <div class="form-actions">
           <button class="btn-secondary" (click)="cancel()">Cancel</button>
           <button class="btn-primary" (click)="onSubmit()" [disabled]="loading()">
-            {{ loading() ? 'Confirming...' : 'Confirm Booking' }}
+            {{ loading() ? 'Booking...' : 'Confirm Booking' }}
           </button>
         </div>
       </div>

@@ -66,4 +66,10 @@ export class AppointmentService {
       params: { date }
     });
   }
+
+  getFullyBookedDates(year: number, month: number): Observable<string[]> {
+  return this.http.get<string[]>(
+    `${this.apiUrl}/appointments/fully-booked-dates?year=${year}&month=${month}`
+  );
+}
 }

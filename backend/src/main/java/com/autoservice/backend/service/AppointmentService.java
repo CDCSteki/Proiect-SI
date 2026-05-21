@@ -75,6 +75,24 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
+    public List<String> getFullyBookedDates(int year, int month) {
+        List<String> allSlots = List.of(
+                "08:00", "09:00", "10:00", "11:00", "12:00",
+                "13:00", "14:00", "15:00", "16:00");
+        int maxPerSlot = 6;
+        int totalSlotsPerDay = allSlots.size() * maxPerSlot; // 54
+
+        LocalDateTime start = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime end = start.plusMonths(1);
+
+        List<Object[]> counts = appointmentRepository.countAppointmentsPerDay(start, end);
+
+        return counts.stream()
+                .filter(row -> (Long) row[1] >= totalSlotsPerDay)
+                .map(row -> row[0].toString())
+                .collect(Collectors.toList());
+    }
+
     public AppointmentResponse updateStatus(UUID appointmentId,
             Appointment.AppointmentStatus status,
             UUID mechanicId) {
@@ -143,8 +161,7 @@ public class AppointmentService {
             response.setMechanicId(appointment.getMechanic().getId());
             response.setMechanicName(
                     appointment.getMechanic().getFirstName() + " " +
-                    appointment.getMechanic().getLastName()
-            );
+                            appointment.getMechanic().getLastName());
         }
         response.setScheduledAt(appointment.getScheduledAt());
         response.setServiceType(appointment.getServiceType());

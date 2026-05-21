@@ -63,6 +63,13 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getAvailableSlots(date));
     }
 
+    @GetMapping("/fully-booked-dates")
+    public ResponseEntity<List<String>> getFullyBookedDates(
+            @RequestParam int year,
+            @RequestParam int month) {
+        return ResponseEntity.ok(appointmentService.getFullyBookedDates(year, month));
+    }
+
     @GetMapping("/calendar")
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<List<AppointmentResponse>> getCalendar(
