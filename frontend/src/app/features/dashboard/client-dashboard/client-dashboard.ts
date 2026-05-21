@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MainLayout } from '../../../core/layout/main-layout/main-layout';
@@ -14,45 +14,42 @@ import { AuthService } from '../../../core/services/auth';
 })
 export class ClientDashboard implements OnInit {
 
-  appointments: Appointment[] = [];
-  loading = true;
-  userName = '';
+  appointments = signal<Appointment[]>([]);
+  loading = signal(true);
+  userName = signal('');
+
+  activeAppointment = computed(() =>
+    this.appointments().find(a =>
+      a.status === 'SCHEDULED' || a.status === 'IN_PROGRESS'
+    )
+  );
+
+  recentAppointments = computed(() =>
+    this.appointments()
+      .filter(a => a.status === 'DONE' || a.status === 'CANCELLED')
+      .slice(0, 5)
+  );
 
   constructor(
     private appointmentService: AppointmentService,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.userName.set(this.authService.getUserName());
     this.loadAppointments();
-    this.userName = this.authService.getUserName();
   }
 
   loadAppointments(): void {
     this.appointmentService.getMyAppointments().subscribe({
       next: (data) => {
-        this.appointments = data;
-        this.loading = false;
-        this.cdr.markForCheck();
+        this.appointments.set(data);
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
-        this.cdr.markForCheck();
+        this.loading.set(false);
       }
     });
-  }
-
-  get activeAppointment(): Appointment | undefined {
-    return this.appointments.find(a =>
-      a.status === 'SCHEDULED' || a.status === 'IN_PROGRESS'
-    );
-  }
-
-  get recentAppointments(): Appointment[] {
-    return this.appointments
-      .filter(a => a.status === 'DONE' || a.status === 'CANCELLED')
-      .slice(0, 5);
   }
 
   getStatusClass(status: string): string {

@@ -6,11 +6,11 @@
         <p class="subtitle">Manage your registered vehicles</p>
       </div>
       <button class="btn-primary" (click)="toggleAddForm()">
-        {{ showAddForm ? 'Cancel' : '+ Add Car' }}
+        {{ showAddForm() ? 'Cancel' : '+ Add Car' }}
       </button>
     </div>
 
-    @if (showAddForm) {
+    @if (showAddForm()) {
       <div class="add-form-card">
         <h3>Add New Car</h3>
         <div class="form-grid">
@@ -50,17 +50,17 @@
           </div>
         </div>
 
-        @if (errorMessage) {
-          <div class="error-message">{{ errorMessage }}</div>
+        @if (errorMessage()) {
+          <div class="error-message">{{ errorMessage() }}</div>
         }
 
-        <button class="btn-primary" (click)="addCar()" [disabled]="addLoading">
-          {{ addLoading ? 'Adding...' : 'Add Car' }}
+        <button class="btn-primary" (click)="addCar()" [disabled]="addLoading()">
+          {{ addLoading() ? 'Adding...' : 'Add Car' }}
         </button>
       </div>
     }
 
-    @if (loading) {
+    @if (loading()) {
       <div class="loading">Loading...</div>
     } @else if (cars.length === 0) {
       <div class="empty-state">
@@ -71,7 +71,7 @@
       </div>
     } @else {
       <div class="cars-grid">
-        @for (car of cars; track car.id) {
+        @for (car of cars(); track car.id) {
           <div class="car-card">
             <div class="car-card-header">
               <div class="car-icon">🚗</div>

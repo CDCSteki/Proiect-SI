@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MainLayout } from '../../../core/layout/main-layout/main-layout';
@@ -14,11 +14,11 @@ import { CarService, Car } from '../../../core/services/car';
 })
 export class AppointmentNew implements OnInit {
 
-  cars: Car[] = [];
-  availableSlots: string[] = [];
-  loading = false;
-  carsLoading = true;
-  errorMessage = '';
+  cars = signal<Car[]>([]);
+  availableSlots = signal<string[]>([]);
+  loading = signal(false);
+  carsLoading = signal(true);
+  errorMessage = signal('');
 
   serviceTypes = [
     'Oil Change',
@@ -42,21 +42,16 @@ export class AppointmentNew implements OnInit {
   constructor(
     private appointmentService: AppointmentService,
     private carService: CarService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.carService.getMyCars().subscribe({
       next: (data) => {
-        this.cars = data;
-        this.carsLoading = false;
-        this.cdr.markForCheck();
+        this.cars.set(data);
+        this.carsLoading.set(false);
       },
-      error: () => {
-        this.carsLoading = false;
-        this.cdr.markForCheck();
-      }
+      error: () => this.carsLoading.set(false)
     });
   }
 
@@ -68,54 +63,42 @@ export class AppointmentNew implements OnInit {
 
   onDateChange(): void {
     if (!this.form.dropoffDate) {
-      this.availableSlots = [];
+      this.availableSlots.set([]);
       return;
     }
-    
+
     const dateParam = `${this.form.dropoffDate}T00:00:00`;
     this.appointmentService.getAvailableSlots(dateParam).subscribe({
       next: (slots) => {
-        this.availableSlots = slots;
-        if (!this.availableSlots.includes(this.form.dropoffTime)) {
-          this.form.dropoffTime = this.availableSlots[0] || '';
+        this.availableSlots.set(slots);
+        if (!slots.includes(this.form.dropoffTime)) {
+          this.form.dropoffTime = slots[0] || '';
         }
-        this.cdr.markForCheck();
       },
-      error: () => {
-        this.availableSlots = [];
-        this.cdr.markForCheck();
-      }
+      error: () => this.availableSlots.set([])
     });
-  }
-
-  cancel(): void {
-    this.router.navigate(['/dashboard']);
   }
 
   onSubmit(): void {
     if (!this.form.carId) {
-      this.errorMessage = 'Please select a car.';
-      this.cdr.markForCheck();
+      this.errorMessage.set('Please select a car.');
       return;
     }
     if (!this.form.serviceType) {
-      this.errorMessage = 'Please select a service type.';
-      this.cdr.markForCheck();
+      this.errorMessage.set('Please select a service type.');
       return;
     }
     if (!this.form.dropoffDate) {
-      this.errorMessage = 'Please select a drop-off date.';
-      this.cdr.markForCheck();
+      this.errorMessage.set('Please select a drop-off date.');
       return;
     }
     if (!this.form.dropoffTime) {
-      this.errorMessage = 'Please select a drop-off time.';
-      this.cdr.markForCheck();
+      this.errorMessage.set('Please select a drop-off time.');
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = '';
+    this.loading.set(true);
+    this.errorMessage.set('');
 
     const combinedDateTime = `${this.form.dropoffDate}T${this.form.dropoffTime}:00`;
 
@@ -127,14 +110,15 @@ export class AppointmentNew implements OnInit {
     };
 
     this.appointmentService.bookAppointment(request).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard']);
-      },
+      next: () => this.router.navigate(['/dashboard']),
       error: (err) => {
-        this.loading = false;
-        this.errorMessage = err.error?.message || 'Failed to book appointment. Please try again.';
-        this.cdr.markForCheck();
+        this.loading.set(false);
+        this.errorMessage.set(err.error?.message || 'Failed to book appointment.');
       }
     });
+  }
+
+  cancel(): void {
+    this.router.navigate(['/dashboard']);
   }
 }

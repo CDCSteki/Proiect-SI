@@ -3,29 +3,29 @@
     <div class="dashboard-header">
       <div>
         <p class="greeting">Good morning,</p>
-        <h1>{{ userName }}</h1>
+        <h1>{{ userName() }}</h1>
       </div>
       <a routerLink="/appointments/new" class="btn-primary">+ New Appointment</a>
     </div>
 
-    @if (loading) {
+    @if (loading()) {
       <div class="loading">Loading...</div>
     } @else {
 
-      @if (activeAppointment) {
+      @if (activeAppointment(); as appt) {
         <div class="active-card">
           <div class="active-card-header">
             <div>
               <p class="section-label">Active Repair</p>
-              <h3>{{ activeAppointment.car.make }} {{ activeAppointment.car.model }} · {{ activeAppointment.car.licensePlate }}</h3>
-              <p class="active-meta">{{ activeAppointment.serviceType }}
-                @if (activeAppointment.mechanicName) {
-                  · Mechanic: {{ activeAppointment.mechanicName }}
+              <h3>{{ appt.car.make }} {{ appt.car.model }} · {{ appt.car.licensePlate }}</h3>
+              <p class="active-meta">{{ appt.serviceType }}
+                @if (appt.mechanicName) {
+                  · Mechanic: {{ appt.mechanicName }}
                 }
               </p>
             </div>
-            <span class="badge" [class]="getStatusClass(activeAppointment.status)">
-              {{ getStatusLabel(activeAppointment.status) }}
+            <span class="badge" [class]="getStatusClass(appt.status)">
+              {{ getStatusLabel(appt.status) }}
             </span>
           </div>
           <div class="timeline">
@@ -33,16 +33,16 @@
               <div class="dot"></div>
               <div>
                 <p class="step-label">Scheduled</p>
-                <p class="step-time">{{ activeAppointment.scheduledAt | date:'dd MMM, HH:mm' }}</p>
+                <p class="step-time">{{ appt.scheduledAt | date:'dd MMM, HH:mm' }}</p>
               </div>
             </div>
-            <div class="timeline-step" [class.done]="activeAppointment.status === 'IN_PROGRESS' || activeAppointment.status === 'DONE'">
+            <div class="timeline-step" [class.done]="appt.status === 'IN_PROGRESS' || appt.status === 'DONE'">
               <div class="dot"></div>
               <div>
                 <p class="step-label">In Progress</p>
               </div>
             </div>
-            <div class="timeline-step" [class.done]="activeAppointment.status === 'DONE' || activeAppointment.status === 'READY_FOR_PICKUP'">
+            <div class="timeline-step" [class.done]="appt.status === 'DONE' || appt.status === 'READY_FOR_PICKUP'">
               <div class="dot"></div>
               <div>
                 <p class="step-label">Ready for Pickup</p>
@@ -77,7 +77,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (appt of recentAppointments; track appt.id) {
+                @for (appt of recentAppointments(); track appt.id) {
                   <tr>
                     <td>{{ appt.scheduledAt | date:'dd MMM yyyy' }}</td>
                     <td>{{ appt.car.make }} {{ appt.car.model }}</td>
