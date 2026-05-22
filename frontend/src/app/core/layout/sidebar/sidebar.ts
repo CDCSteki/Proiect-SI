@@ -51,8 +51,10 @@ export class Sidebar implements OnInit {
         ];
       case 'MANAGER':
         return [
-          { path: '/manager', label: 'Dashboard', icon: '🏠' },
-          { path: '/appointments', label: 'Calendar', icon: '📅' },
+          { path: '/manager/dashboard', label: 'Timetable Grid', icon: '📅' },
+          { path: '/manager/appointments', label: 'Unassigned', icon: '🔧' },
+          { path: '/manager/leaves', label: 'Leave Requests', icon: '🏖️' },
+          { path: '/manager/stats', label: 'Analytics & Stats', icon: '📊' },
           ...common
         ];
       case 'ADMIN':

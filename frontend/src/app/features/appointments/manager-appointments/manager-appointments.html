@@ -1,0 +1,88 @@
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <h1>Unassigned Appointments</h1>
+      <p class="subtitle">Assign available mechanics to pending jobs</p>
+    </div>
+    
+    @if (loading()) {
+      <div class="loading">Loading appointments...</div>
+    } @else {
+      @if (unassigned().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🔧</span>
+          <h3>All caught up</h3>
+          <p>There are no unassigned appointments right now.</p>
+        </div>
+      } @else {
+      <div class="appointments-grid">
+        @for (appt of unassigned(); track appt.id) {
+          <div class="appointment-card">
+            <div class="card-header">
+              <div class="car-info">
+                <span class="car-icon">🚗</span>
+                <div>
+                  <h3>{{ appt.car?.make }} {{ appt.car?.model }}</h3>
+                  <span class="car-plate">{{ appt.car?.licensePlate }}</span>
+                </div>
+              </div>
+              <span class="badge badge-warn">Unassigned</span>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <span class="info-label">Service:</span>
+                <span class="info-value">{{ appt.serviceType }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Date & Time:</span>
+                <span class="info-value">{{ appt.scheduledAt | date:'dd MMM yyyy, HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="btn-primary" (click)="openAssignModal(appt)">Assign Mechanic</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+}
+  </div>
+
+  @if (showMechanicModal()) {
+    <div class="modal-overlay" (click)="showMechanicModal.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Assign Mechanic</h3>
+          <button class="close-btn" (click)="showMechanicModal.set(false)">✕</button>
+        </div>
+
+        @if (selectedAppointment(); as appt) {
+          <div class="modal-appt-info">
+            <p><strong>{{ appt.car?.make }} {{ appt.car?.model }}</strong> · {{ appt.car?.licensePlate }}</p>
+            <p>{{ appt.serviceType }} · {{ appt.scheduledAt | date:'dd MMM, HH:mm' }}</p>
+          </div>
+        }
+
+        <div class="modal-body">
+          @if (availableMechanics().length === 0) {
+            <p class="empty-text">No mechanics available at this time slot.</p>
+          } @else {
+            <div class="mechanics-list">
+              @for (mechanic of availableMechanics(); track mechanic.mechanicId) {
+                <div class="mechanic-item" (click)="assignMechanic(mechanic.mechanicId)">
+                  <div class="mechanic-avatar">
+                    {{ mechanic.firstName.charAt(0) }}{{ mechanic.lastName.charAt(0) }}
+                  </div>
+                  <div>
+                    <p class="mechanic-name">{{ mechanic.firstName }} {{ mechanic.lastName }}</p>
+                    <p class="mechanic-spec">{{ mechanic.specialization || 'General' }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</app-main-layout>

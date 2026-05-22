@@ -20,12 +20,24 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'manager',
+    path: 'manager/dashboard',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/dashboard/manager-dashboard/manager-dashboard').then(
-        (m) => m.ManagerDashboard,
-      ),
+    loadComponent: () => import('./features/dashboard/manager-dashboard/manager-dashboard').then((m) => m.ManagerDashboard),
+  },
+  {
+    path: 'manager/appointments',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/appointments/manager-appointments/manager-appointments').then((m) => m.ManagerAppointments),
+  },
+  {
+    path: 'manager/leaves',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/leaves/manager-leaves/manager-leaves').then((m) => m.ManagerLeaves),
+  },
+  {
+    path: 'manager/stats',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/stats/manager-stats/manager-stats').then((m) => m.ManagerStats),
   },
   {
     path: 'mechanic',

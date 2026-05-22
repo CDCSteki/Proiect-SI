@@ -1,0 +1,102 @@
+.page { max-width: 100%; width: 100%; }
+
+.page-header {
+  margin-bottom: 24px;
+  h1 { font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: var(--muted); }
+}
+
+.appointments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.appointment-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+
+  .car-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .car-plate { font-size: 12px; color: var(--muted); }
+  }
+  .car-icon { font-size: 24px; }
+}
+
+.card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.info-row {
+  display: flex;
+  font-size: 13px;
+  .info-label { color: var(--muted); width: 90px; }
+  .info-value { color: var(--text); font-weight: 500; }
+}
+
+.badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-warn { background: rgba(255, 184, 77, 0.15); color: #ffb84d; border: 1px solid rgba(255, 184, 77, 0.3); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: #3d68f0; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  .empty-icon { font-size: 40px; display: block; margin-bottom: 12px; }
+  h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  p { font-size: 14px; color: var(--muted); }
+}
+
+// Modal Styles
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 480px; overflow: hidden; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border); h3 { font-size: 16px; font-weight: 600; color: var(--text); } }
+.close-btn { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; &:hover { color: var(--text); } }
+.modal-appt-info { padding: 16px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted); p { margin-bottom: 4px; } strong { color: var(--text); } }
+.modal-body { padding: 16px 20px; }
+.mechanics-list { display: flex; flex-direction: column; gap: 10px; }
+.mechanic-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; &:hover { border-color: var(--accent); background: rgba(79, 124, 255, 0.05); } }
+.mechanic-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.mechanic-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.mechanic-spec { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.empty-text { font-size: 14px; color: var(--muted); text-align: center; padding: 20px 0; }
+
+.loading { text-align: center; padding: 40px; color: var(--muted); }

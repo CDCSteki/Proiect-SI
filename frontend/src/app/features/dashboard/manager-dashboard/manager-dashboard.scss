@@ -1,0 +1,171 @@
+.page { max-width: 100%; width: 100%; }
+
+.page-header {
+  margin-bottom: 24px;
+  h1 { font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: var(--muted); }
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  .week-label { font-size: 16px; font-weight: 600; color: var(--text); }
+
+  .cal-nav {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    &:hover { border-color: var(--accent); color: var(--accent); }
+  }
+}
+
+.timetable-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.timetable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 900px;
+
+  th, td { border: 1px solid var(--border); padding: 8px; vertical-align: top; }
+  th { background: var(--bg-secondary); padding: 12px 8px; }
+
+  .time-col { width: 80px; }
+  .time-cell { text-align: center; background: var(--bg-secondary); color: var(--text); font-size: 13px; padding-top: 14px; }
+
+  .day-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    .day-name { font-size: 12px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .day-number { font-size: 14px; color: var(--text); font-weight: 500; }
+  }
+
+  .timetable-cell { height: 90px; background: transparent; }
+}
+
+.cell-appointments { display: flex; flex-direction: column; gap: 6px; }
+
+.timetable-card {
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-left: 4px solid transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .card-title {
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-service {
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+
+  .card-mechanic {
+    font-weight: 500;
+  }
+
+  .card-unassigned-tag {
+    font-weight: 600;
+  }
+
+  // Roșu/Coral pentru programări fără mecanic repartizat (necesită atenție)
+  &.status-unassigned {
+    background: rgba(255, 92, 92, 0.08);
+    color: #ff5c5c;
+    border-left-color: #ff5c5c;
+    border-top: 1px solid rgba(255, 92, 92, 0.15);
+    border-right: 1px solid rgba(255, 92, 92, 0.15);
+    border-bottom: 1px solid rgba(255, 92, 92, 0.15);
+    
+    .card-service { color: rgba(255, 92, 92, 0.8); }
+  }
+
+  // Albastru pentru programări planificate cu mecanic deja alocat
+  &.status-scheduled {
+    background: rgba(79, 124, 255, 0.08);
+    color: #4f7cff;
+    border-left-color: #4f7cff;
+    border-top: 1px solid rgba(79, 124, 255, 0.15);
+    border-right: 1px solid rgba(79, 124, 255, 0.15);
+    border-bottom: 1px solid rgba(79, 124, 255, 0.15);
+
+    .card-service { color: rgba(79, 124, 255, 0.8); }
+  }
+
+  // Galben/Chihlimbar pentru mașini aflate în lucru pe rampă
+  &.status-inprogress {
+    background: rgba(255, 184, 77, 0.08);
+    color: #ffb84d;
+    border-left-color: #ffb84d;
+    border-top: 1px solid rgba(255, 184, 77, 0.15);
+    border-right: 1px solid rgba(255, 184, 77, 0.15);
+    border-bottom: 1px solid rgba(255, 184, 77, 0.15);
+
+    .card-service { color: rgba(255, 184, 77, 0.8); }
+  }
+
+  // Verde pentru reparații finalizate cu succes
+  &.status-done {
+    background: rgba(0, 212, 170, 0.08);
+    color: var(--accent2, #00d4aa);
+    border-left-color: var(--accent2, #00d4aa);
+    border-top: 1px solid rgba(0, 212, 170, 0.15);
+    border-right: 1px solid rgba(0, 212, 170, 0.15);
+    border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+
+    .card-service { color: rgba(0, 212, 170, 0.8); }
+  }
+
+  // Gri tăiat pentru cele anulate
+  &.status-cancelled {
+    background: rgba(150, 150, 150, 0.08);
+    color: var(--muted, #888);
+    border-left-color: var(--muted, #888);
+    border-top: 1px solid rgba(150, 150, 150, 0.15);
+    border-right: 1px solid rgba(150, 150, 150, 0.15);
+    border-bottom: 1px solid rgba(150, 150, 150, 0.15);
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+}
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 480px; overflow: hidden; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border); h3 { font-size: 16px; font-weight: 600; color: var(--text); } }
+.close-btn { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; &:hover { color: var(--text); } }
+.modal-appt-info { padding: 16px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted); p { margin-bottom: 4px; } strong { color: var(--text); } }
+.modal-body { padding: 16px 20px; }
+.mechanics-list { display: flex; flex-direction: column; gap: 10px; }
+.mechanic-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; &:hover { border-color: var(--accent); background: rgba(79, 124, 255, 0.05); } }
+.mechanic-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.mechanic-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.mechanic-spec { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.empty-text { font-size: 14px; color: var(--muted); text-align: center; padding: 20px 0; }
+
+.loading { text-align: center; padding: 40px; color: var(--muted); }

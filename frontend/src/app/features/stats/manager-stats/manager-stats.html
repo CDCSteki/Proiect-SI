@@ -1,0 +1,91 @@
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <h1>Analytics & Statistics</h1>
+      <p class="subtitle">Monthly overview and performance metrics</p>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading statistics...</div>
+    } @else {
+      <div class="stats-section">
+        <h3>Monthly Comparison</h3>
+        <div class="stats-grid">
+          
+          <div class="stat-card">
+            <div class="card-icon">💰</div>
+            <div class="stat-content">
+              <div class="stat-label">Revenue This Month</div>
+              <div class="stat-val">{{ thisMonthRevenue() | number:'1.2-2' }} RON</div>
+              <div class="stat-trend" [class.positive]="revenueTrend().isPositive" [class.negative]="!revenueTrend().isPositive">
+                {{ revenueTrend().isPositive ? '↑' : '↓' }} {{ revenueTrend().value | number:'1.0-1' }}% vs last month
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="card-icon">📅</div>
+            <div class="stat-content">
+              <div class="stat-label">Appointments This Month</div>
+              <div class="stat-val">{{ thisMonthCount() }}</div>
+              <div class="stat-trend" [class.positive]="countTrend().isPositive" [class.negative]="!countTrend().isPositive">
+                {{ countTrend().isPositive ? '↑' : '↓' }} {{ countTrend().value | number:'1.0-1' }}% vs last month
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="card-icon">✅</div>
+            <div class="stat-content">
+              <div class="stat-label">Overall Completion Rate</div>
+              <div class="stat-val">{{ completionRate() | number:'1.0-1' }}%</div>
+              <div class="stat-trend neutral">Based on total appointments</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="charts-layout">
+        <div class="chart-container card-style">
+          <h4>Revenue Evolution (6 Months)</h4>
+          <div class="bar-chart">
+            <div class="chart-bars">
+              @for (item of revenueHistory(); track item.month) {
+                <div class="bar-wrapper">
+                  <div class="bar-tooltip">{{ item.amount | number:'1.0-0' }} RON</div>
+                  <div class="bar" [style.height.%]="item.height || 5"></div>
+                  <span class="bar-label">{{ item.month }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (statusStats()) {
+          <div class="chart-container card-style">
+            <h4>Distribution Breakdown</h4>
+            <div class="progress-list">
+              <div class="progress-item">
+                <div class="progress-labels"><span>Scheduled</span><span>{{ statusStats().scheduled }}</span></div>
+                <div class="progress-bar-bg"><div class="progress-bar fill-scheduled" [style.width.%]="(statusStats().scheduled / (thisMonthCount() || 1)) * 100"></div></div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-labels"><span>In Progress</span><span>{{ statusStats().inProgress }}</span></div>
+                <div class="progress-bar-bg"><div class="progress-bar fill-progress" [style.width.%]="(statusStats().inProgress / (thisMonthCount() || 1)) * 100"></div></div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-labels"><span>Completed</span><span>{{ statusStats().done }}</span></div>
+                <div class="progress-bar-bg"><div class="progress-bar fill-done" [style.width.%]="(statusStats().done / (thisMonthCount() || 1)) * 100"></div></div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-labels"><span>Cancelled</span><span>{{ statusStats().cancelled }}</span></div>
+                <div class="progress-bar-bg"><div class="progress-bar fill-cancelled" [style.width.%]="(statusStats().cancelled / (thisMonthCount() || 1)) * 100"></div></div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</app-main-layout>

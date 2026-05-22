@@ -1,0 +1,49 @@
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <h1>Leave Requests</h1>
+      <p class="subtitle">Review time-off requests from your mechanics</p>
+    </div>
+
+    @if (pendingLeaves().length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">🏖️</span>
+        <h3>No pending requests</h3>
+        <p>You have reviewed all leave requests.</p>
+      </div>
+    } @else {
+      <div class="leaves-grid">
+        @for (leave of pendingLeaves(); track leave.id) {
+          <div class="leave-card">
+            <div class="leave-header">
+              <div class="mechanic-info">
+                <div class="avatar">{{ leave.mechanicName?.charAt(0) || 'M' }}</div>
+                <div>
+                  <h3>{{ leave.mechanicName || 'Unknown Mechanic' }}</h3>
+                  <span class="leave-type">{{ leave.reason }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="leave-body">
+              <div class="date-range">
+                <div class="date-box">
+                  <span class="label">From</span>
+                  <span class="value">{{ leave.startDate | date:'dd MMM yyyy' }}</span>
+                </div>
+                <div class="arrow">→</div>
+                <div class="date-box">
+                  <span class="label">To</span>
+                  <span class="value">{{ leave.endDate | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="leave-footer">
+              <button class="btn-danger" (click)="approveLeave(leave.id, false)">Reject</button>
+              <button class="btn-success" (click)="approveLeave(leave.id, true)">Approve</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</app-main-layout>

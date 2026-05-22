@@ -1,1 +1,103 @@
-<p>manager-dashboard works!</p>
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <h1>Timetable Grid</h1>
+      <p class="subtitle">Weekly overview of scheduled appointments</p>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading calendar...</div>
+    } @else {
+      <div class="calendar-controls">
+        <button class="cal-nav" (click)="prevWeek()">←</button>
+        <span class="week-label">{{ weekLabel() }}</span>
+        <button class="cal-nav" (click)="nextWeek()">→</button>
+      </div>
+
+      <div class="timetable-wrapper">
+        <table class="timetable">
+          <thead>
+            <tr>
+              <th class="time-col">Time</th>
+              @for (day of weekAppointments(); track day.dateStr) {
+                <th>
+                  <div class="day-header">
+                    <span class="day-name">{{ day.date | date:'EEE' }}</span>
+                    <span class="day-number">{{ day.date | date:'dd MMM' }}</span>
+                  </div>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (slot of timeSlots; track slot) {
+              <tr>
+                <td class="time-cell"><strong>{{ slot }}</strong></td>
+                @for (day of weekAppointments(); track day.dateStr) {
+                  <td class="timetable-cell">
+                    <div class="cell-appointments">
+                      @for (appt of getAppointmentsForCell(day.dateStr, slot); track appt.id) {
+                        <div class="timetable-card" 
+                             [class]="!appt.mechanicName && appt.status !== 'CANCELLED' ? 'status-unassigned' : 
+                                      appt.status === 'SCHEDULED' ? 'status-scheduled' : 
+                                      appt.status === 'IN_PROGRESS' ? 'status-inprogress' : 
+                                      appt.status === 'DONE' ? 'status-done' : 'status-cancelled'"
+                             (click)="openAssignModal(appt)">
+                          <div class="card-title">{{ appt.car?.make }} {{ appt.car?.model }}</div>
+                          <div class="card-service">{{ appt.serviceType }}</div>
+                          @if (appt.mechanicName) {
+                            <div class="card-mechanic">👤 {{ appt.mechanicName }}</div>
+                          } @else {
+                            <div class="card-unassigned-tag">⚠️ Unassigned</div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  @if (showMechanicModal()) {
+    <div class="modal-overlay" (click)="showMechanicModal.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Assign Mechanic</h3>
+          <button class="close-btn" (click)="showMechanicModal.set(false)">✕</button>
+        </div>
+
+        @if (selectedAppointment(); as appt) {
+          <div class="modal-appt-info">
+            <p><strong>{{ appt.car?.make }} {{ appt.car?.model }}</strong> · {{ appt.car?.licensePlate }}</p>
+            <p>{{ appt.serviceType }} · {{ appt.scheduledAt | date:'dd MMM, HH:mm' }}</p>
+          </div>
+        }
+
+        <div class="modal-body">
+          @if (availableMechanics().length === 0) {
+            <p class="empty-text">No mechanics available at this time slot.</p>
+          } @else {
+            <div class="mechanics-list">
+              @for (mechanic of availableMechanics(); track mechanic.mechanicId) {
+                <div class="mechanic-item" (click)="assignMechanic(mechanic.mechanicId)">
+                  <div class="mechanic-avatar">
+                    {{ mechanic.firstName.charAt(0) }}{{ mechanic.lastName.charAt(0) }}
+                  </div>
+                  <div>
+                    <p class="mechanic-name">{{ mechanic.firstName }} {{ mechanic.lastName }}</p>
+                    <p class="mechanic-spec">{{ mechanic.specialization || 'General' }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</app-main-layout>
