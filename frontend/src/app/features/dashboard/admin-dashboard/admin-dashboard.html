@@ -1,0 +1,234 @@
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">Manage users and view system statistics</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab() === 'users'" (click)="setTab('users')">
+        Users
+      </button>
+      <button class="tab" [class.active]="activeTab() === 'stats'" (click)="setTab('stats')">
+        Statistics
+      </button>
+    </div>
+
+    <!-- Users Tab -->
+    @if (activeTab() === 'users') {
+
+      <div class="toolbar">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by name or email..."
+          [value]="searchQuery()"
+          (input)="setSearch($any($event.target).value)"
+        />
+        <div class="role-filters">
+          @for (role of roleFilters; track role) {
+            <button
+              class="filter-btn"
+              [class.active]="selectedRoleFilter() === role"
+              (click)="selectedRoleFilter.set(role)"
+            >
+              {{ role }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (loading()) {
+        <div class="loading">Loading...</div>
+      } @else if (filteredUsers().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">👥</span>
+          <h3>No users found</h3>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of filteredUsers(); track user.id) {
+                <tr>
+                  <td>
+                    <div class="user-info">
+                      <div class="user-avatar">
+                        {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                      </div>
+                      <span>{{ user.firstName }} {{ user.lastName }}</span>
+                    </div>
+                  </td>
+                  <td class="muted">{{ user.email }}</td>
+                  <td class="muted">{{ user.phoneNumber || '—' }}</td>
+                  <td>
+                    <span class="badge" [class]="getRoleClass(user.role)">
+                      {{ user.role }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="user.active ? 'badge-green' : 'badge-danger'">
+                      {{ user.active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="btn-sm" (click)="openRoleModal(user)">
+                        Change Role
+                      </button>
+                      <button
+                        class="btn-sm"
+                        [class.btn-danger]="user.active"
+                        [class.btn-success]="!user.active"
+                        (click)="toggleActive(user)"
+                      >
+                        {{ user.active ? 'Deactivate' : 'Activate' }}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- Stats Tab -->
+    @if (activeTab() === 'stats') {
+      @if (stats()) {
+        <div class="stats-section">
+          <h3>Users by Role</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-val" style="color: var(--accent)">{{ stats().clients }}</div>
+              <div class="stat-label">Clients</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color: var(--accent2)">{{ stats().mechanics }}</div>
+              <div class="stat-label">Mechanics</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color: #ffb84d">{{ stats().managers }}</div>
+              <div class="stat-label">Managers</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color: #ff5c5c">{{ stats().admins }}</div>
+              <div class="stat-label">Admins</div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (appointmentStats()) {
+        <div class="stats-section">
+          <h3>Appointments by Status</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-val" style="color: var(--accent)">{{ appointmentStats().scheduled }}</div>
+              <div class="stat-label">Scheduled</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color: #ffb84d">{{ appointmentStats().inProgress }}</div>
+              <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color: var(--accent2)">{{ appointmentStats().done }}</div>
+              <div class="stat-label">Done</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color: #ff5c5c">{{ appointmentStats().cancelled }}</div>
+              <div class="stat-label">Cancelled</div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (revenue()) {
+        <div class="stats-section">
+          <h3>Total Revenue</h3>
+          <div class="revenue-card">
+            <div class="revenue-val">{{ revenue().total | number:'1.2-2' }} RON</div>
+            <div class="revenue-label">From all paid invoices</div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Role Modal -->
+  @if (showRoleModal()) {
+    <div class="modal-overlay" (click)="closeRoleModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Change Role</h3>
+          <button class="close-btn" (click)="closeRoleModal()">✕</button>
+        </div>
+
+        @if (selectedUser(); as user) {
+          <div class="modal-user-info">
+            <div class="user-avatar">{{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}</div>
+            <div>
+              <p class="user-name">{{ user.firstName }} {{ user.lastName }}</p>
+              <p class="user-email">{{ user.email }}</p>
+            </div>
+          </div>
+        }
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>New Role</label>
+            <select [(ngModel)]="roleForm.role" name="role">
+              @for (role of roles; track role) {
+                <option [value]="role">{{ role }}</option>
+              }
+            </select>
+          </div>
+
+          @if (roleForm.role === 'MECHANIC') {
+            <div class="form-group">
+              <label>Specialization</label>
+              <input type="text" [(ngModel)]="roleForm.specialization" placeholder="e.g. Engine Repair" />
+            </div>
+            <div class="form-group">
+              <label>Hourly Rate (RON)</label>
+              <input type="number" [(ngModel)]="roleForm.hourlyRate" placeholder="50" />
+            </div>
+          }
+
+          @if (roleForm.role === 'MANAGER') {
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" [(ngModel)]="roleForm.department" placeholder="e.g. Service" />
+            </div>
+          }
+
+          @if (roleForm.role === 'ADMIN') {
+            <div class="form-group">
+              <label>Access Level</label>
+              <input type="number" [(ngModel)]="roleForm.accessLevel" min="1" max="5" />
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeRoleModal()">Cancel</button>
+          <button class="btn-primary" (click)="saveRole()">Save</button>
+        </div>
+      </div>
+    </div>
+  }
+</app-main-layout>

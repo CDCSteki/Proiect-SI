@@ -58,7 +58,6 @@ export class Sidebar implements OnInit {
       case 'ADMIN':
         return [
           { path: '/admin', label: 'Dashboard', icon: '🏠' },
-          { path: '/users', label: 'Users', icon: '👥' },
           ...common
         ];
       default:

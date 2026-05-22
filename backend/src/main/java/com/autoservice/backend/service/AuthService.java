@@ -41,9 +41,13 @@ public class AuthService {
         return new AuthResponse(token);
     }
 
-    public AuthResponse login(LoginRequest request) {
+   public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid credentials"));
+        
+        if (!user.isActive()) {
+            throw new ConflictException("Account is deactivated");
+        }
         
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new ResourceNotFoundException("Invalid credentials");
