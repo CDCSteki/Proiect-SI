@@ -94,7 +94,9 @@ public class UserService {
 
         User updated = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return mapToResponse(updated);
+        UserResponse response = mapToResponse(updated);
+        response.setRole(newRole);
+        return response;
     }
 
     private UserResponse mapToResponse(User user) {

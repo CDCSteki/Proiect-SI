@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MainLayout } from '../../../core/layout/main-layout/main-layout';
 import { AdminService, UserResponse, ChangeRoleRequest } from '../../../core/services/admin';
+import { AuthService } from '../../../core/services/auth';
 import { DecimalPipe } from '@angular/common';
 
 @Component({
@@ -56,7 +57,7 @@ export class AdminDashboard implements OnInit {
     return result;
   });
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -66,7 +67,10 @@ export class AdminDashboard implements OnInit {
   loadUsers(): void {
     this.adminService.getAllUsers().subscribe({
       next: (data) => {
-        this.users.set(data);
+        const currentUserId = this.authService.getUserId();
+        const otherUsers = data.filter(u => u.id !== currentUserId);
+        
+        this.users.set(otherUsers);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)

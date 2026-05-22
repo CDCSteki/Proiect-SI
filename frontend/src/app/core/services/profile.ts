@@ -9,7 +9,7 @@ export interface UserProfile {
   email: string;
   role: string;
   phoneNumber: string;
-  isActive: boolean;
+  active: boolean;
 }
 
 export interface UpdateProfileRequest {
