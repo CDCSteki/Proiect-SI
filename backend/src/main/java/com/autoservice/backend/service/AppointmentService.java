@@ -136,6 +136,13 @@ public class AppointmentService {
         return mapToResponse(appointment);
     }
 
+    public List<AppointmentResponse> getMyTasks(UUID mechanicId, LocalDateTime from, LocalDateTime to) {
+        return appointmentRepository.findByMechanicIdAndScheduledAtBetweenOrderByScheduledAt(mechanicId, from, to)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public void cancel(UUID appointmentId, UUID clientId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));

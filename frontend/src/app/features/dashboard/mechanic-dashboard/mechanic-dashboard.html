@@ -1,1 +1,117 @@
-<p>mechanic-dashboard works!</p>
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1>My Active Tasks</h1>
+        <p class="subtitle">{{ today | date:'EEEE, dd MMMM yyyy' }}</p>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-chip">
+        <span class="chip-val">{{ activeTasks().length }}</span>
+        <span class="chip-label">Active Tasks</span>
+      </div>
+      <div class="stat-chip accent">
+        <span class="chip-val">{{ inProgressCount() }}</span>
+        <span class="chip-label">In Progress</span>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading tasks...</div>
+    } @else {
+      @if (activeTasks().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">☕</span>
+          <h3>No active tasks</h3>
+          <p>You have processed all your work and have no pending jobs.</p>
+        </div>
+      } @else {
+        <div class="tasks-grid">
+          @for (task of activeTasks(); track task.id) {
+            <div class="task-card" [class.card-inprogress]="task.status === 'IN_PROGRESS'">
+              <div class="task-header">
+                <div>
+                  <span class="badge {{ getStatusClass(task.status) }}">{{ task.status }}</span>
+                  <span class="time-tag" [style.color]="task.scheduledAt.slice(0, 10) < today.toISOString().slice(0, 10) ? '#ff5c5c' : 'inherit'">
+                    ⏰ {{ task.scheduledAt | date:'dd MMM, HH:mm' }}
+                  </span>
+                </div>
+              </div>
+              <div class="task-body">
+                <h3>{{ task.car.make }} {{ task.car.model }}</h3>
+                <p class="plate">{{ task.car.licensePlate }}</p>
+                <div class="service-type">🔧 {{ task.serviceType }}</div>
+              </div>
+              <div class="task-actions">
+                @if (task.status === 'SCHEDULED') {
+                  <button class="btn-primary" (click)="startTask(task.id)">🚀 Start Job</button>
+                }
+                @if (task.status === 'IN_PROGRESS') {
+                  <button class="btn-secondary" (click)="openRepairModal(task)">📝 Manage Record</button>
+                  <button class="btn-success" (click)="completeTask(task.id)">✅ Finish Job</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  @if (showRepairModal()) {
+    <div class="modal-overlay" (click)="showRepairModal.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Repair Sheet Setup</h3>
+          <button class="close-btn" (click)="showRepairModal.set(false)">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="repair-form">
+            <div class="form-group">
+              <label>Diagnosis Details</label>
+              <textarea [(ngModel)]="repairForm.diagnosis" placeholder="Describe findings..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Labor Hours Spend</label>
+              <input type="number" [(ngModel)]="repairForm.laborHours" min="0" step="0.5" />
+            </div>
+            <button class="btn-primary" (click)="saveRepairRecord()">Update Base Specs</button>
+          </div>
+
+          @if (currentRepairRecord()) {
+            <div class="parts-section">
+              <h4>Parts Ledger & Costs</h4>
+              @if (currentRepairRecord()?.parts?.length === 0) {
+                <p class="no-parts">No parts added yet.</p>
+              } @else {
+                <div class="parts-list">
+                  @for (part of currentRepairRecord()?.parts; track part.id) {
+                    <div class="part-item">
+                      <span class="part-name">{{ part.name }}</span>
+                      <span class="part-qty">x{{ part.quantity }}</span>
+                      <span class="part-price">{{ part.totalPrice | number:'1.2-2' }} RON</span>
+                      <button class="btn-delete-part" (click)="deletePart(part.id)">✕</button>
+                    </div>
+                  }
+                </div>
+              }
+              <div class="add-part-form">
+                <div class="part-inputs">
+                  <input type="text" [(ngModel)]="partForm.name" placeholder="Part name" />
+                  <input type="number" [(ngModel)]="partForm.price" placeholder="Price" step="0.01" min="0" />
+                  <input type="number" [(ngModel)]="partForm.quantity" placeholder="Qty" min="1" />
+                  <button class="btn-add-part" (click)="addPart()">+ Add</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showRepairModal.set(false)">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+</app-main-layout>

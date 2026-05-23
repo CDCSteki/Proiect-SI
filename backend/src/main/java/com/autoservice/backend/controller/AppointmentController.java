@@ -40,6 +40,16 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getMyAppointments(userId));
     }
 
+    @GetMapping("/tasks")
+    @PreAuthorize("hasRole('MECHANIC')")
+    public ResponseEntity<List<AppointmentResponse>> getMyTasks(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            Authentication authentication) {
+        UUID mechanicId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(appointmentService.getMyTasks(mechanicId, from, to));
+    }
+
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('MECHANIC') or hasRole('MANAGER')")
     public ResponseEntity<AppointmentResponse> updateStatus(

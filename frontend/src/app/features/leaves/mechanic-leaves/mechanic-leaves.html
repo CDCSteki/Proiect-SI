@@ -1,0 +1,79 @@
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1>My Time Off</h1>
+        <p class="subtitle">Request and monitor operational leaves</p>
+      </div>
+      <button class="btn-primary" (click)="showLeaveModal.set(true)">🏖️ Request Time Off</button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading requests...</div>
+    } @else {
+      @if (myLeaves().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🏖️</span>
+          <h3>No leave records</h3>
+          <p>You haven't requested any leaves or holiday periods yet.</p>
+        </div>
+      } @else {
+        <div class="tasks-grid">
+          @for (leave of myLeaves(); track leave.id) {
+            <div class="task-card">
+              <div class="task-header">
+                <span class="badge {{ leave.status === 'PENDING' ? 'badge-warn' : leave.status === 'APPROVED' ? 'badge-green' : 'badge-danger' }}">
+                  {{ leave.status }}
+                </span>
+                @if (leave.status === 'PENDING') {
+                  <button class="btn-delete-part" (click)="deleteLeave(leave.id)">✕ Cancel</button>
+                }
+              </div>
+              <div class="task-body">
+                <h3>{{ leave.reason || 'Vacation' }}</h3>
+                <p class="date-range">
+                  <span>📅 From: <b>{{ leave.startDate | date:'dd MMM yyyy' }}</b></span><br/>
+                  <span>📅 To: <b>{{ leave.endDate | date:'dd MMM yyyy' }}</b></span>
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  @if (showLeaveModal()) {
+    <div class="modal-overlay" (click)="showLeaveModal.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Request Time Off</h3>
+          <button class="close-btn" (click)="showLeaveModal.set(false)">✕</button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="submitLeaveRequest()" class="repair-form">
+            @if (leaveError()) {
+              <div class="error-msg" style="color: #ff5c5c; margin-bottom: 12px; font-size: 13px;">⚠️ {{ leaveError() }}</div>
+            }
+            <div class="form-group">
+              <label>Start Date</label>
+              <input type="date" [(ngModel)]="leaveForm.startDate" name="startDate" required />
+            </div>
+            <div class="form-group">
+              <label>End Date</label>
+              <input type="date" [(ngModel)]="leaveForm.endDate" name="endDate" required />
+            </div>
+            <div class="form-group">
+              <label>Reason / Note</label>
+              <input type="text" [(ngModel)]="leaveForm.reason" name="reason" placeholder="e.g. Medical, Annual Holiday" />
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+              <button type="button" class="btn-secondary" (click)="showLeaveModal.set(false)">Cancel</button>
+              <button type="submit" class="btn-primary">Submit Request</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</app-main-layout>

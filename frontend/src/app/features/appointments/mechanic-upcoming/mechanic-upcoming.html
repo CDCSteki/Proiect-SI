@@ -1,0 +1,40 @@
+<app-main-layout>
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1>Upcoming Agenda</h1>
+        <p class="subtitle">Future schedule log</p>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading records...</div>
+    } @else {
+      @if (upcomingTasks().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">📅</span>
+          <h3>No upcoming records</h3>
+          <p>Your forward-facing operational agenda is completely clear.</p>
+        </div>
+      } @else {
+        <div class="tasks-grid">
+          @for (task of upcomingTasks(); track task.id) {
+            <div class="task-card">
+              <div class="task-header">
+                <div>
+                  <span class="badge badge-blue">{{ task.status }}</span>
+                  <span class="time-tag">🗓️ {{ task.scheduledAt | date:'dd MMM, HH:mm' }}</span>
+                </div>
+              </div>
+              <div class="task-body">
+                <h3>{{ task.car.make }} {{ task.car.model }}</h3>
+                <p class="plate">{{ task.car.licensePlate }}</p>
+                <div class="service-type">🔧 {{ task.serviceType }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</app-main-layout>

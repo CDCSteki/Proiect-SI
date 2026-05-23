@@ -40,12 +40,19 @@ export const routes: Routes = [
     loadComponent: () => import('./features/stats/manager-stats/manager-stats').then((m) => m.ManagerStats),
   },
   {
-    path: 'mechanic',
+    path: 'mechanic/dashboard',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/dashboard/mechanic-dashboard/mechanic-dashboard').then(
-        (m) => m.MechanicDashboard,
-      ),
+    loadComponent: () => import('./features/dashboard/mechanic-dashboard/mechanic-dashboard').then((m) => m.MechanicDashboard),
+  },
+  {
+    path: 'mechanic/upcoming',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/appointments/mechanic-upcoming/mechanic-upcoming').then((m) => m.MechanicUpcoming),
+  },
+  {
+    path: 'mechanic/leaves',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/leaves/mechanic-leaves/mechanic-leaves').then((m) => m.MechanicLeaves),
   },
   {
     path: 'admin',

@@ -28,7 +28,7 @@ export class Login {
         const role = this.authService.getRole();
         switch (role) {
           case 'MANAGER': this.router.navigate(['/manager/dashboard']); break;
-          case 'MECHANIC': this.router.navigate(['/mechanic']); break;
+          case 'MECHANIC': this.router.navigate(['/mechanic/dashboard']); break;
           case 'ADMIN': this.router.navigate(['/admin']); break;
           default: this.router.navigate(['/dashboard']);
         }

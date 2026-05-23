@@ -45,8 +45,9 @@ export class Sidebar implements OnInit {
         ];
       case 'MECHANIC':
         return [
-          { path: '/mechanic', label: 'Dashboard', icon: '🏠' },
-          { path: '/appointments', label: 'My Tasks', icon: '🔧' },
+          { path: '/mechanic/dashboard', label: 'My Active Tasks', icon: '🔧' },
+          { path: '/mechanic/upcoming', label: 'Upcoming Agenda', icon: '📅' },
+          { path: '/mechanic/leaves', label: 'My Time Off', icon: '🏖️' },
           ...common
         ];
       case 'MANAGER':
