@@ -30,6 +30,12 @@
                 <h3>{{ task.car.make }} {{ task.car.model }}</h3>
                 <p class="plate">{{ task.car.licensePlate }}</p>
                 <div class="service-type">🔧 {{ task.serviceType }}</div>
+                
+                @if (task.notes) {
+                  <div class="task-notes" style="margin-top: 12px; padding: 10px; background: var(--bg-secondary); border-left: 3px solid var(--accent); font-size: 13px; border-radius: 6px; color: var(--text);">
+                    📝 <strong>Notes:</strong> {{ task.notes }}
+                  </div>
+                }
               </div>
             </div>
           }

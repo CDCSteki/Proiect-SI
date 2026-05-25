@@ -39,6 +39,7 @@ public class RepairRecordService {
         record.setDiagnosis(request.getDiagnosis());
         record.setLaborHours(request.getLaborHours());
 
+        record.setTotalCost(record.calculateComputedTotal());
         repairRecordRepository.save(record);
 
         return mapToResponse(record);
@@ -55,13 +56,7 @@ public class RepairRecordService {
         part.setQuantity(request.getQuantity());
         partRepository.save(part);
 
-        // Recalculate total cost
-        BigDecimal totalParts = partRepository.findByRepairRecordId(repairRecordId)
-                .stream()
-                .map(p -> p.getPrice().multiply(BigDecimal.valueOf(p.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        record.setTotalCost(totalParts);
+        record.setTotalCost(record.calculateComputedTotal());
         repairRecordRepository.save(record);
 
         return mapToResponse(record);

@@ -30,8 +30,9 @@ export class ManagerStats implements OnInit, OnDestroy {
   completionRate = computed(() => {
     const stats = this.statusStats();
     if (!stats) return 0;
-    const total = stats.scheduled + stats.inProgress + stats.done + stats.cancelled;
-    return total === 0 ? 0 : (stats.done / total) * 100;
+    
+    // Folosim valorile trimise direct din backend
+    return stats.completionRate || 0;
   });
 
   constructor(private managerService: ManagerService) {}
@@ -39,7 +40,6 @@ export class ManagerStats implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.fetchData(false);
 
-    // Refresh la fiecare 30 de secunde pentru statistici
     this.pollingSub = interval(30000).subscribe(() => {
       this.fetchData(true);
     });
@@ -63,6 +63,8 @@ export class ManagerStats implements OnInit, OnDestroy {
 
     const m2Start = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
     const m2End = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+
+    const maxRevenue = Math.max(...revenues, 1);
 
     const monthsData: { label: string; start: string; end: string }[] = [];
     for (let i = 5; i >= 0; i--) {

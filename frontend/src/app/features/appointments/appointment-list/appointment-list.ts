@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe, CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http'; // ADAUGAT PENTRU FACTURĂ
 import { MainLayout } from '../../../core/layout/main-layout/main-layout';
 import { AppointmentService, Appointment } from '../../../core/services/appointment';
 import { MechanicService } from '../../../core/services/mechanic';
@@ -20,10 +21,13 @@ export class AppointmentList implements OnInit {
   selectedCarId = signal<string>('ALL');
 
   showInvoiceModal = signal(false);
-  selectedInvoice = signal<any>(null);
+  selectedInvoice = signal<any>(null); // Păstrează RepairRecord (diagnoză, piese)
+  currentInvoice = signal<any>(null);  // ADAUGAT: Păstrează Factura oficială (pentru laborCost)
   selectedJobDetails = signal<Appointment | null>(null);
 
   confirmDialog = viewChild.required(ConfirmDialog);
+
+  private apiUrl = 'http://localhost:8080/api'; // ADAUGAT
 
   acknowledgedIds = signal<string[]>(
     JSON.parse(localStorage.getItem('acknowledged_appointments') || '[]')
@@ -57,7 +61,8 @@ export class AppointmentList implements OnInit {
 
   constructor(
     private appointmentService: AppointmentService,
-    private mechanicService: MechanicService
+    private mechanicService: MechanicService,
+    private http: HttpClient // ADAUGAT
   ) {}
 
   ngOnInit(): void {
@@ -87,9 +92,18 @@ export class AppointmentList implements OnInit {
     this.selectedJobDetails.set(appointment);
     this.showInvoiceModal.set(true);
     this.selectedInvoice.set(null);
+    this.currentInvoice.set(null); // Resetăm factura curentă
 
     this.mechanicService.getRepairRecord(appointment.id).subscribe({
-      next: (record) => this.selectedInvoice.set(record),
+      next: (record: any) => {
+        this.selectedInvoice.set(record);
+        
+        // ADAUGAT: Preia detaliile financiare suplimentare (manopera) din Invoice
+        this.http.get<any>(`${this.apiUrl}/invoices/repair-record/${record.id}`).subscribe({
+          next: (invoice) => this.currentInvoice.set(invoice),
+          error: () => this.currentInvoice.set(null)
+        });
+      },
       error: () => this.selectedInvoice.set(null)
     });
   }

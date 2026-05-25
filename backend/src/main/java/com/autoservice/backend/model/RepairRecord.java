@@ -37,4 +37,16 @@ public class RepairRecord {
  
     @OneToOne(mappedBy = "repairRecord", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Invoice invoice;
+
+    public BigDecimal calculateComputedTotal() {
+        BigDecimal partsCost = (this.parts == null) ? BigDecimal.ZERO : this.parts.stream()
+                .map(part -> part.getPrice().multiply(BigDecimal.valueOf(part.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal laborCost = BigDecimal.ZERO;
+        if (this.laborHours != null && this.appointment != null && this.appointment.getMechanic() != null) {
+            laborCost = this.laborHours.multiply(this.appointment.getMechanic().getHourlyRate());
+        }
+        return partsCost.add(laborCost);
+    }
 }

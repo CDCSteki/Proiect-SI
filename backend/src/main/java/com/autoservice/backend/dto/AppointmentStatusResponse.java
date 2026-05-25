@@ -9,5 +9,7 @@ public class AppointmentStatusResponse {
     private Long scheduled;
     private Long inProgress;
     private Long done;
+    private Long readyForPickup;
     private Long cancelled;
+    private double completionRate;
 }

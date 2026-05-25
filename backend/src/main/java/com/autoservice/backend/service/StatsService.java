@@ -36,13 +36,24 @@ public class StatsService {
 }
 
 public AppointmentStatusResponse getAppointmentsByStatus() {
-    return AppointmentStatusResponse.builder()
-            .scheduled(appointmentRepository.countByStatus(Appointment.AppointmentStatus.SCHEDULED))
-            .inProgress(appointmentRepository.countByStatus(Appointment.AppointmentStatus.IN_PROGRESS))
-            .done(appointmentRepository.countByStatus(Appointment.AppointmentStatus.DONE))
-            .cancelled(appointmentRepository.countByStatus(Appointment.AppointmentStatus.CANCELLED))
-            .build();
-}
+        long scheduled = appointmentRepository.countByStatus(Appointment.AppointmentStatus.SCHEDULED);
+        long inProgress = appointmentRepository.countByStatus(Appointment.AppointmentStatus.IN_PROGRESS);
+        long done = appointmentRepository.countByStatus(Appointment.AppointmentStatus.DONE);
+        long readyForPickup = appointmentRepository.countByStatus(Appointment.AppointmentStatus.READY_FOR_PICKUP);
+        long cancelled = appointmentRepository.countByStatus(Appointment.AppointmentStatus.CANCELLED);
+        
+        long total = scheduled + inProgress + done + readyForPickup + cancelled;
+        double completionRate = total == 0 ? 0.0 : ((double) (done + readyForPickup) / total) * 100;
+
+        return AppointmentStatusResponse.builder()
+                .scheduled(scheduled)
+                .inProgress(inProgress)
+                .done(done)
+                .readyForPickup(readyForPickup)
+                .cancelled(cancelled)
+                .completionRate(completionRate)
+                .build();
+    }
 
 public DailyAppointmentsResponse getAppointmentsCount(LocalDateTime start, LocalDateTime end) {
     Long count = appointmentRepository.countByScheduledAtBetween(start, end);

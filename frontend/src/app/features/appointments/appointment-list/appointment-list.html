@@ -16,7 +16,7 @@
             [class.active]="selectedStatus() === status"
             (click)="setFilter(status)"
           >
-            {{ status === 'ALL' ? 'All' : (status === 'READY_FOR_PICKUP' ? 'Ready / Picked Up' : status) }}
+            {{ status === 'ALL' ? 'All' : (status === 'READY_FOR_PICKUP' ? 'READY/PICKED_UP' : status) }}
           </button>
         }
       </div>
@@ -108,49 +108,73 @@
         </div>
         
         <div class="modal-body">
-          <div class="invoice-preview-sheet">
-            <div class="inv-header-block">
-              <h4>{{ selectedJobDetails()?.car?.make }} {{ selectedJobDetails()?.car?.model }}</h4>
-              <p>License Plate: {{ selectedJobDetails()?.car?.licensePlate }}</p>
-              <p>Service Performed: {{ selectedJobDetails()?.serviceType }}</p>
-            </div>
+          @if (selectedInvoice(); as record) {
+            <div class="invoice-preview-sheet" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px;">
+              <div class="inv-header-block" style="border-bottom: 1px dashed var(--border); padding-bottom: 14px; margin-bottom: 14px;">
+                <h4 style="font-size: 15px; margin: 0 0 4px 0; color: var(--text);">
+                  {{ selectedJobDetails()?.car?.make }} {{ selectedJobDetails()?.car?.model }}
+                </h4>
+                <p style="font-size: 13px; color: var(--muted); margin: 0;">License Plate: {{ selectedJobDetails()?.car?.licensePlate }}</p>
+                <p style="font-size: 13px; color: var(--muted); margin: 0;">Service Performed: {{ selectedJobDetails()?.serviceType }}</p>
+                @if (currentInvoice()?.invoiceNumber) {
+                  <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;"><strong>Invoice No:</strong> {{ currentInvoice()?.invoiceNumber }}</p>
+                }
+              </div>
 
-            @if (selectedInvoice()) {
-              <div class="inv-section">
-                <h4>Diagnostics & Labor</h4>
-                <p style="font-size: 13px; margin-bottom: 8px; color: var(--text); line-height: 1.4;">
-                  {{ selectedInvoice()?.diagnosis }}
+              <div class="spec-section" style="margin-bottom: 20px;">
+                <h4 style="font-size: 12px; color: var(--muted); text-transform: uppercase; margin: 0 0 8px 0; letter-spacing: 0.5px;">Diagnosis & Assessment</h4>
+                <p class="diagnosis-text" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 13px; color: var(--text); margin: 0; line-height: 1.5; border-left: 3px solid var(--border);">
+                  {{ record.diagnosis || 'No specialized diagnostic information recorded.' }}
                 </p>
-                <div class="inv-row">
-                  <span>Total Labor Time</span>
-                  <span>{{ selectedInvoice()?.laborHours }}h</span>
+              </div>
+
+              <div class="spec-section">
+                <h4 style="font-size: 12px; color: var(--muted); text-transform: uppercase; margin: 0 0 8px 0; letter-spacing: 0.5px;">Work Breakdown Log</h4>
+                <table class="spec-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--bg-secondary); color: var(--muted); font-weight: 500;">Resource / Description</th>
+                      <th style="text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--bg-secondary); color: var(--muted); font-weight: 500;">Qty / Hrs</th>
+                      <th style="text-align: right; padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--bg-secondary); color: var(--muted); font-weight: 500;">Unit Rate</th>
+                      <th style="text-align: right; padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--bg-secondary); color: var(--muted); font-weight: 500;">Total Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (part of record.parts; track part.id) {
+                      <tr>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text);">🔧 {{ part.name }}</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text);">{{ part.quantity }} pcs</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); text-align: right;">${{ part.price | number:'1.2-2' }}</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); text-align: right;">${{ part.totalPrice | number:'1.2-2' }}</td>
+                      </tr>
+                    }
+                    @if (record.laborHours && record.laborHours > 0) {
+                      <tr>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text);">👨‍🔧 Mechanical Engineering Labor</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text);">{{ record.laborHours }} hrs</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); text-align: right;">—</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); text-align: right;">${{ currentInvoice()?.laborCost || 0 | number:'1.2-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="invoice-summary" style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);">
+                <div class="summary-line" style="display: flex; justify-content: flex-end; align-items: center; gap: 16px; font-size: 14px; color: var(--muted);">
+                  <span>Aggregated Total Valuation:</span>
+                  <strong class="total-price" style="font-size: 20px; color: var(--accent); font-weight: 600;">${{ record.totalCost | number:'1.2-2' }}</strong>
                 </div>
               </div>
 
-              @if (selectedInvoice()?.parts?.length > 0) {
-                <div class="inv-section">
-                  <h4>Parts & Components Used</h4>
-                  @for (part of selectedInvoice()?.parts; track part.id) {
-                    <div class="inv-row">
-                      <span>{{ part.name }} x{{ part.quantity }}</span>
-                      <span>{{ part.totalPrice | number:'1.2-2' }} RON</span>
-                    </div>
-                  }
-                </div>
-              }
-
-              <div class="inv-total">
-                <span>Total Invoice Amount</span>
-                <span class="total-val">{{ selectedInvoice()?.totalCost | number:'1.2-2' }} RON</span>
-              </div>
-            } @else {
-              <div class="loading">Fetching secure financial records...</div>
-            }
-          </div>
+            </div>
+          } @else {
+            <div class="loading" style="text-align: center; padding: 48px; color: var(--muted); font-size: 14px;">Fetching secure financial records...</div>
+          }
         </div>
 
-        <div class="modal-footer">
-          <button class="btn-primary" (click)="showInvoiceModal.set(false)">Close</button>
+        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end;">
+          <button class="btn-primary" (click)="showInvoiceModal.set(false)">Close View</button>
         </div>
       </div>
     </div>

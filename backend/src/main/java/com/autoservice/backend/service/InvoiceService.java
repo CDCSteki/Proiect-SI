@@ -54,6 +54,13 @@ public class InvoiceService {
         response.setInvoiceNumber(invoice.getInvoiceNumber());
         response.setAmount(invoice.getAmount());
         response.setPaid(invoice.isPaid());
+        java.math.BigDecimal laborCost = java.math.BigDecimal.ZERO;
+        var record = invoice.getRepairRecord();
+        if (record.getLaborHours() != null && record.getAppointment() != null
+                && record.getAppointment().getMechanic() != null) {
+            laborCost = record.getLaborHours().multiply(record.getAppointment().getMechanic().getHourlyRate());
+        }
+        response.setLaborCost(laborCost);
         return response;
     }
 }

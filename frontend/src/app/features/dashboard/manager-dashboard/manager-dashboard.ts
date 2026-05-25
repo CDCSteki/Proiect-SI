@@ -97,14 +97,20 @@ export class ManagerDashboard implements OnInit, OnDestroy {
 
     this.selectedAppointment.set(appointment);
     this.showMechanicModal.set(true);
-    this.managerService.getAvailableMechanics(appointment.scheduledAt.slice(0, 19)).subscribe({
-      next: (data) => this.availableMechanics.set(data),
-    });
+
+    if (!appointment.mechanicName && !appointment.mechanicId) {
+      this.managerService.getAvailableMechanics(appointment.scheduledAt.slice(0, 19)).subscribe({
+        next: (data) => this.availableMechanics.set(data),
+      });
+    } else {
+      this.availableMechanics.set([]);
+    }
   }
 
   assignMechanic(mechanicId: string): void {
     const appt = this.selectedAppointment();
-    if (!appt) return;
+    if (!appt || appt.mechanicName || appt.mechanicId) return;
+    
     this.managerService.assignMechanic(appt.id, mechanicId).subscribe({
       next: () => {
         this.showMechanicModal.set(false);

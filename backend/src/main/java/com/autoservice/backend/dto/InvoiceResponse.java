@@ -11,4 +11,5 @@ public class InvoiceResponse {
     private String invoiceNumber;
     private BigDecimal amount;
     private boolean isPaid;
+    private BigDecimal laborCost;
 }

@@ -2,31 +2,27 @@
   <div class="page">
     <div class="page-header">
       <h1>Invoices & Billing</h1>
-      <p class="subtitle">Review completed tasks and finalize billing</p>
+      <p class="subtitle">Manage customer billing accounts and action completed tasks</p>
     </div>
 
     <div class="tabs">
-      <button class="tab" [class.active]="activeTab() === 'pending'" (click)="activeTab.set('pending')">
-        Pending Review
-        @if (pendingJobs().length > 0) {
-          <span class="tab-badge">{{ pendingJobs().length }}</span>
-        }
+      <button class="tab-btn" [class.active]="activeTab() === 'pending'" (click)="activeTab.set('pending')">
+        Pending Generation ({{ pendingJobs().length }})
       </button>
-      <button class="tab" [class.active]="activeTab() === 'generated'" (click)="activeTab.set('generated')">
-        Invoice History
+      <button class="tab-btn" [class.active]="activeTab() === 'generated'" (click)="activeTab.set('generated')">
+        Invoice History ({{ generatedInvoices().length }})
       </button>
     </div>
 
     @if (loading()) {
       <div class="loading">Loading records...</div>
     } @else {
-
       @if (activeTab() === 'pending') {
         @if (pendingJobs().length === 0) {
           <div class="empty-state">
-            <span class="empty-icon">✅</span>
-            <h3>No pending reviews</h3>
-            <p>All completed repairs have been successfully invoiced.</p>
+            <span class="empty-icon">✓</span>
+            <h3>All caught up!</h3>
+            <p>No jobs are currently waiting for invoice generation.</p>
           </div>
         } @else {
           <div class="jobs-grid">
@@ -42,11 +38,10 @@
                   </div>
                 </div>
                 <div class="job-body">
-                  <p><strong>Service Type:</strong> {{ job.serviceType }}</p>
-                  <p><strong>Mechanic Assignment:</strong> {{ job.mechanicName || 'Assigned Mechanic' }}</p>
+                  <p><strong>Operation:</strong> {{ job.serviceType }}</p>
+                  <p><strong>Finished:</strong> {{ job.scheduledAt | date:'dd MMM yyyy, HH:mm' }}</p>
                 </div>
                 <div class="job-footer">
-                  <span class="time">Ended: {{ job.scheduledAt | date:'dd MMM, HH:mm' }}</span>
                   <button class="btn-primary" (click)="openInvoiceModal(job)">Review & Bill</button>
                 </div>
               </div>
@@ -60,7 +55,7 @@
           <div class="empty-state">
             <span class="empty-icon">📄</span>
             <h3>No invoice history</h3>
-            <p>No processed invoices found in the current billing cycle.</p>
+            <p>No processed invoices found in the system registry.</p>
           </div>
         } @else {
           <div class="jobs-grid">
@@ -77,11 +72,21 @@
                 </div>
                 <div class="job-body">
                   <p><strong>Operation:</strong> {{ job.serviceType }}</p>
-                  <p><strong>Status:</strong> <span class="badge badge-green">READY FOR PICKUP</span></p>
+                  <p><strong>Status:</strong> 
+                    <span class="badge" [ngClass]="job.isPaid ? 'badge-green' : 'badge-warn'">
+                      {{ job.isPaid ? 'READY / PAID' : 'READY / UNPAID' }}
+                    </span>
+                  </p>
                 </div>
                 <div class="job-footer">
                   <span class="time">Billed: {{ job.scheduledAt | date:'dd MMM yyyy' }}</span>
                   <button class="btn-secondary" (click)="openInvoiceModal(job)">View Specs</button>
+                  
+                  @if (!job.isPaid) {
+                    <button class="btn-primary" style="margin-left: 8px; background: #00d4aa;" (click)="markAsPaid(job)">Mark as Paid</button>
+                  } @else {
+                    <span class="badge badge-green" style="margin-left: 8px; display: inline-block; padding: 6px 12px; border-radius: 6px;">PAID</span>
+                  }
                 </div>
               </div>
             }
@@ -89,70 +94,91 @@
         }
       }
     }
-  </div>
 
-  @if (showInvoiceModal()) {
-    <div class="modal-overlay" (click)="showInvoiceModal.set(false)">
-      <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Service Invoice Summary</h3>
-          <button class="close-btn" (click)="showInvoiceModal.set(false)">✕</button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="invoice-preview-sheet">
-            <div class="inv-header-block">
-              <h4>{{ selectedJob()?.car?.make }} {{ selectedJob()?.car?.model }} · {{ selectedJob()?.car?.licensePlate }}</h4>
-              <p>Type of Action: {{ selectedJob()?.serviceType }}</p>
-              <p>Responsible: {{ selectedJob()?.mechanicName || 'Workshop Staff' }}</p>
-            </div>
+    @if (showInvoiceModal()) {
+      <div class="modal-overlay" (click)="showInvoiceModal.set(false)">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Service Specification Details</h3>
+            <button class="close-btn" (click)="showInvoiceModal.set(false)">✕</button>
+          </div>
+          <div class="modal-body">
+            @if (repairRecord(); as record) {
+              <div class="spec-section">
+                <h4>Diagnosis & Assessment</h4>
+                <p class="diagnosis-text">{{ record.diagnosis || 'No specialized diagnostic information recorded.' }}</p>
+              </div>
 
-            @if (repairRecord()) {
-              <div class="inv-section">
-                <h4>Repair Profile</h4>
-                <p style="font-size: 13px; margin-bottom: 8px; color: var(--text);">
-                  {{ repairRecord()?.diagnosis || 'No additional comments.' }}
-                </p>
-                <div class="inv-row">
-                  <span>Labor Time Allocation</span>
-                  <span>{{ repairRecord()?.laborHours }}h</span>
+              <div class="spec-section">
+                <h4>Work Breakdown Log</h4>
+                <table class="spec-table">
+                  <thead>
+                    <tr>
+                      <th>Resource / Description</th>
+                      <th>Quantity / Hours</th>
+                      <th class="text-right">Unit Rate</th>
+                      <th class="text-right">Total Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (part of record.parts; track part.id) {
+                      <tr>
+                        <td>🔧 {{ part.name }} (Part component)</td>
+                        <td>{{ part.quantity }} pcs</td>
+                        <td class="text-right">${{ part.price | number:'1.2-2' }}</td>
+                        <td class="text-right">${{ part.totalPrice | number:'1.2-2' }}</td>
+                      </tr>
+                    }
+                    @if (record.laborHours && record.laborHours > 0) {
+                      <tr>
+                        <td>👨‍🔧 Mechanical Engineering Labor Operation</td>
+                        <td>{{ record.laborHours }} hrs</td>
+                        <td class="text-right">—</td>
+                        <td class="text-right">${{ currentInvoice()?.laborCost || 0 | number:'1.2-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="invoice-summary">
+                <div class="summary-line">
+                  <span>Aggregated Total Valuation:</span>
+                  <strong class="total-price">${{ record.totalCost | number:'1.2-2' }}</strong>
                 </div>
               </div>
 
-              @if (repairRecord()?.parts?.length > 0) {
-                <div class="inv-section">
-                  <h4>Component Ledger</h4>
-                  @for (part of repairRecord()?.parts; track part.id) {
-                    <div class="inv-row">
-                      <span>{{ part.name }} x{{ part.quantity }}</span>
-                      <span>{{ part.totalPrice | number:'1.2-2' }} RON</span>
-                    </div>
-                  }
+              @if (activeTab() === 'pending') {
+                <div class="modal-actions">
+                  <button class="btn-secondary" (click)="showInvoiceModal.set(false)">Close View</button>
+                  <button class="btn-primary" [disabled]="generating()" (click)="generateInvoice()">
+                    {{ generating() ? 'Processing...' : 'Approve & Settle Statement' }}
+                  </button>
                 </div>
               }
-
-              <div class="inv-total">
-                <span>Calculated Balance</span>
-                <span class="total-val">{{ repairRecord()?.totalCost | number:'1.2-2' }} RON</span>
-              </div>
-              
             } @else {
-              <div class="no-record-warn">
-                ⚠️ Operational record missing. The technician has not initialized the service ledger parameters.
-              </div>
+              <div class="loading">Parsing workflow aggregates...</div>
             }
           </div>
         </div>
+      </div>
+    }
 
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="showInvoiceModal.set(false)">Close</button>
-          @if (selectedJob()?.status === 'DONE') {
-            <button class="btn-primary" (click)="generateInvoice()" [disabled]="!repairRecord() || generating()">
-              {{ generating() ? 'Authorizing...' : '📄 Approve & Generate' }}
-            </button>
-          }
+    @if (customAlert().show) {
+      <div class="modal-overlay alert-overlay" style="z-index: 1100;">
+        <div class="modal alert-modal" style="max-width: 400px; text-align: center; padding: 24px;">
+          <h3>{{ customAlert().title }}</h3>
+          <p style="margin: 16px 0; color: var(--muted); font-size: 14px; line-height: 1.5;">{{ customAlert().message }}</p>
+          <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px;">
+            @if (customAlert().type === 'confirm') {
+              <button class="btn-secondary" (click)="closeAlert()">Cancel</button>
+              <button class="btn-primary" (click)="customAlert().action?.(); closeAlert()">Confirm</button>
+            } @else {
+              <button class="btn-primary" (click)="closeAlert()">OK</button>
+            }
+          </div>
         </div>
       </div>
-    </div>
-  }
+    }
+  </div>
 </app-main-layout>
