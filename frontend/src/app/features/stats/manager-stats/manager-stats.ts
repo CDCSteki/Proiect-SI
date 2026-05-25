@@ -64,8 +64,6 @@ export class ManagerStats implements OnInit, OnDestroy {
     const m2Start = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
     const m2End = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
 
-    const maxRevenue = Math.max(...revenues, 1);
-
     const monthsData: { label: string; start: string; end: string }[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
