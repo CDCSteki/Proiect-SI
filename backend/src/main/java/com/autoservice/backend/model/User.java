@@ -35,4 +35,7 @@ public class User {
 
     @Column(length = 20)
     private String phoneNumber;
+
+    @Column(nullable = false)
+    private int tokenVersion = 0;
 }

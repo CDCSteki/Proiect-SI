@@ -1,6 +1,6 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 
 @Component({
@@ -10,22 +10,35 @@ import { AuthService } from '../../../core/services/auth';
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
-export class Login {
+export class Login implements OnInit {
 
   email = '';
   password = '';
   loading = false;
   errorMessage = '';
+  infoMessage = '';
 
   constructor(
-    private authService: AuthService, 
+    private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
+
+  ngOnInit(): void {
+    // Arata mesaj context-ual daca a fost redirectat automat
+    const reason = this.route.snapshot.queryParamMap.get('reason');
+    if (reason === 'session_expired') {
+      this.infoMessage = 'Your session has expired because you logged in from another location.';
+    } else if (reason === 'other_tab_login') {
+      this.infoMessage = 'You have been signed out because a new login was detected in another tab.';
+    }
+  }
 
   onLogin(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.infoMessage = '';
 
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: () => {

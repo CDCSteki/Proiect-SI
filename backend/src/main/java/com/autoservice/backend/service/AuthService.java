@@ -34,28 +34,33 @@ public class AuthService {
         client.setEmail(request.getEmail());
         client.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         client.setPhoneNumber(request.getPhoneNumber());
-        
+        client.setTokenVersion(0);
+
         clientRepository.save(client);
-        
+
         String token = jwtUtil.generateToken(client, "CLIENT");
         return new AuthResponse(token);
     }
 
-   public AuthResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid credentials"));
-        
+
         if (!user.isActive()) {
             throw new ConflictException("Account is deactivated");
         }
-        
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new ResourceNotFoundException("Invalid credentials");
         }
-        
+
+        // Incrementeaza tokenVersion — invalideaza toate sesiunile active anterior
+        user.setTokenVersion(user.getTokenVersion() + 1);
+        userRepository.save(user);
+
         String role = user.getClass().getSimpleName().toUpperCase();
         String token = jwtUtil.generateToken(user, role);
-        
+
         return new AuthResponse(token);
     }
 }

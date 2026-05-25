@@ -27,4 +27,11 @@ public class AuthController {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateSession() {
+        // Endpoint protejat. Dacă token-ul a expirat (tokenVersion diferit),
+        // JwtAuthFilter va returna 401 automat înainte să ajungă aici.
+        return ResponseEntity.ok().build();
+    }
 }

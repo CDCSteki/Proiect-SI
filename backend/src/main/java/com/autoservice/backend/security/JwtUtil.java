@@ -26,14 +26,15 @@ public class JwtUtil {
     }
 
     public String generateToken(User user, String role) {
-    return Jwts.builder()
-            .subject(user.getId().toString())
-            .claim("role", role)
-            .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + expiration))
-            .signWith(getSigningKey())
-            .compact();
-}
+        return Jwts.builder()
+                .subject(user.getId().toString())
+                .claim("role", role)
+                .claim("tv", user.getTokenVersion()) // token version
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
 
     public boolean isTokenValid(String token) {
         try {
@@ -50,6 +51,13 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return (String) parseClaims(token).get("role");
+    }
+
+    public int extractTokenVersion(String token) {
+        Object tv = parseClaims(token).get("tv");
+        if (tv instanceof Integer) return (Integer) tv;
+        if (tv instanceof Long) return ((Long) tv).intValue();
+        return -1;
     }
 
     private Claims parseClaims(String token) {
