@@ -170,8 +170,8 @@
                       <tr>
                         <td style="padding: 10px 12px; border-bottom: 1px solid var(--border);">👨‍🔧 Mechanical Engineering Labor</td>
                         <td style="padding: 10px 12px; border-bottom: 1px solid var(--border);">{{ record.laborHours }} hrs</td>
-                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: right;">—</td>
-                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: right;">${{ currentInvoice()?.laborCost || 0 | number:'1.2-2' }}</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: right;">${{ record.mechanicHourlyRate || 0 | number:'1.2-2' }}</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: right;">${{ record.laborCost || 0 | number:'1.2-2' }}</td>
                       </tr>
                     }
                   </tbody>

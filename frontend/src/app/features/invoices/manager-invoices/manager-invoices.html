@@ -133,8 +133,8 @@
                       <tr>
                         <td>👨‍🔧 Mechanical Engineering Labor Operation</td>
                         <td>{{ record.laborHours }} hrs</td>
-                        <td class="text-right">—</td>
-                        <td class="text-right">${{ currentInvoice()?.laborCost || 0 | number:'1.2-2' }}</td>
+                        <td class="text-right">${{ record.mechanicHourlyRate || 0 | number:'1.2-2' }}</td>
+                        <td class="text-right">${{ record.laborCost || 0 | number:'1.2-2' }}</td>
                       </tr>
                     }
                   </tbody>

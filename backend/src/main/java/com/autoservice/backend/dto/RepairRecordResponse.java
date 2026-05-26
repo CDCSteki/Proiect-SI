@@ -12,6 +12,7 @@ public class RepairRecordResponse {
     private String diagnosis;
     private BigDecimal laborHours;
     private BigDecimal laborCost;
+    private BigDecimal mechanicHourlyRate;
     private BigDecimal totalCost;
     private List<PartResponse> parts;
 

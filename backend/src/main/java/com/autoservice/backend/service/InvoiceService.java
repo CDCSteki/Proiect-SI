@@ -9,6 +9,7 @@ import com.autoservice.backend.repository.RepairRecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -54,13 +55,20 @@ public class InvoiceService {
         response.setInvoiceNumber(invoice.getInvoiceNumber());
         response.setAmount(invoice.getAmount());
         response.setPaid(invoice.isPaid());
-        java.math.BigDecimal laborCost = java.math.BigDecimal.ZERO;
+        
+        BigDecimal laborCost = BigDecimal.ZERO;
+        BigDecimal hourlyRate = BigDecimal.ZERO;
         var record = invoice.getRepairRecord();
+        
         if (record.getLaborHours() != null && record.getAppointment() != null
-                && record.getAppointment().getMechanic() != null) {
-            laborCost = record.getLaborHours().multiply(record.getAppointment().getMechanic().getHourlyRate());
+                && record.getAppointment().getMechanic() != null
+                && record.getAppointment().getMechanic().getHourlyRate() != null) {
+            hourlyRate = record.getAppointment().getMechanic().getHourlyRate();
+            laborCost = record.getLaborHours().multiply(hourlyRate);
         }
         response.setLaborCost(laborCost);
+        response.setMechanicHourlyRate(hourlyRate);
+        
         return response;
     }
 }

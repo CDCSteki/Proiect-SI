@@ -80,12 +80,16 @@ public class RepairRecordService {
         response.setTotalCost(record.getTotalCost());
 
         BigDecimal laborCost = BigDecimal.ZERO;
+        BigDecimal hourlyRate = BigDecimal.ZERO;
+        
         if (record.getLaborHours() != null && record.getAppointment() != null
                 && record.getAppointment().getMechanic() != null
                 && record.getAppointment().getMechanic().getHourlyRate() != null) {
-            laborCost = record.getLaborHours().multiply(record.getAppointment().getMechanic().getHourlyRate());
+            hourlyRate = record.getAppointment().getMechanic().getHourlyRate();
+            laborCost = record.getLaborHours().multiply(hourlyRate);
         }
         response.setLaborCost(laborCost);
+        response.setMechanicHourlyRate(hourlyRate);
 
         if (record.getParts() != null) {
             response.setParts(record.getParts().stream().map(p -> {

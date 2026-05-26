@@ -12,4 +12,5 @@ public class InvoiceResponse {
     private BigDecimal amount;
     private boolean isPaid;
     private BigDecimal laborCost;
+    private BigDecimal mechanicHourlyRate;
 }
