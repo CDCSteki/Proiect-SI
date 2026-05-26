@@ -92,13 +92,23 @@ export class ManagerDashboard implements OnInit, OnDestroy {
     );
   }
 
+  getCardClass(appt: any): string {
+    if (appt.status === 'CANCELLED') return 'status-cancelled';
+    if (appt.status === 'DONE') return 'status-done';
+    if (appt.status === 'READY_FOR_PICKUP') return 'status-done';
+    if (appt.status === 'IN_PROGRESS') return 'status-inprogress';
+    if (!appt.mechanicName && !appt.mechanicId) return 'status-unassigned';
+    return 'status-scheduled';
+  }
+
   openAssignModal(appointment: any): void {
-    if (appointment.status === 'DONE' || appointment.status === 'CANCELLED') return;
+    if (appointment.status === 'CANCELLED') return;
 
     this.selectedAppointment.set(appointment);
     this.showMechanicModal.set(true);
 
-    if (!appointment.mechanicName && !appointment.mechanicId) {
+    if (!appointment.mechanicName && !appointment.mechanicId &&
+        appointment.status !== 'DONE' && appointment.status !== 'READY_FOR_PICKUP') {
       this.managerService.getAvailableMechanics(appointment.scheduledAt.slice(0, 19)).subscribe({
         next: (data) => this.availableMechanics.set(data),
       });
@@ -110,7 +120,7 @@ export class ManagerDashboard implements OnInit, OnDestroy {
   assignMechanic(mechanicId: string): void {
     const appt = this.selectedAppointment();
     if (!appt || appt.mechanicName || appt.mechanicId) return;
-    
+
     this.managerService.assignMechanic(appt.id, mechanicId).subscribe({
       next: () => {
         this.showMechanicModal.set(false);
@@ -127,6 +137,7 @@ export class ManagerDashboard implements OnInit, OnDestroy {
     });
     this.loadData();
   }
+
   nextWeek(): void {
     this.currentWeekStart.update((d) => {
       const n = new Date(d);

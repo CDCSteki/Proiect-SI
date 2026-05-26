@@ -12,13 +12,14 @@ import { forkJoin, interval, Subscription } from 'rxjs';
   styleUrl: './manager-stats.scss'
 })
 export class ManagerStats implements OnInit, OnDestroy {
-  
+
   statusStats = signal<any>(null);
   thisMonthRevenue = signal<number>(0);
   lastMonthRevenue = signal<number>(0);
   thisMonthCount = signal<number>(0);
   lastMonthCount = signal<number>(0);
   loading = signal(true);
+  maxChartRevenue = signal<number>(0);
 
   revenueHistory = signal<{ month: string; amount: number; height: number }[]>([]);
 
@@ -30,9 +31,14 @@ export class ManagerStats implements OnInit, OnDestroy {
   completionRate = computed(() => {
     const stats = this.statusStats();
     if (!stats) return 0;
-    
-    // Folosim valorile trimise direct din backend
     return stats.completionRate || 0;
+  });
+
+  totalForDistribution = computed(() => {
+    const stats = this.statusStats();
+    if (!stats) return 1;
+    const total = (stats.scheduled || 0) + (stats.inProgress || 0) + (stats.done || 0) + (stats.cancelled || 0);
+    return total === 0 ? 1 : total;
   });
 
   constructor(private managerService: ManagerService) {}
@@ -57,7 +63,7 @@ export class ManagerStats implements OnInit, OnDestroy {
     }
 
     const now = new Date();
-    
+
     const m1Start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const m1End = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
@@ -88,26 +94,27 @@ export class ManagerStats implements OnInit, OnDestroy {
     }).subscribe({
       next: (res: any) => {
         this.statusStats.set(res.status);
-        this.thisMonthRevenue.set(res.revThis.total || 0);
-        this.lastMonthRevenue.set(res.revLast.total || 0);
+        this.thisMonthRevenue.set(parseFloat(res.revThis.total) || 0);
+        this.lastMonthRevenue.set(parseFloat(res.revLast.total) || 0);
         this.thisMonthCount.set(res.countThis.count || 0);
         this.lastMonthCount.set(res.countLast.count || 0);
 
         const revenues = [
-          res.m0.total || 0,
-          res.m1.total || 0,
-          res.m2.total || 0,
-          res.m3.total || 0,
-          res.m4.total || 0,
-          res.m5.total || 0
+          parseFloat(res.m0.total) || 0,
+          parseFloat(res.m1.total) || 0,
+          parseFloat(res.m2.total) || 0,
+          parseFloat(res.m3.total) || 0,
+          parseFloat(res.m4.total) || 0,
+          parseFloat(res.m5.total) || 0
         ];
 
         const maxRevenue = Math.max(...revenues, 1);
-        
+        this.maxChartRevenue.set(maxRevenue);
+
         const history = monthsData.map((m, index) => ({
           month: m.label,
           amount: revenues[index],
-          height: (revenues[index] / maxRevenue) * 100
+          height: Math.max((revenues[index] / maxRevenue) * 100, revenues[index] > 0 ? 2 : 0)
         }));
 
         this.revenueHistory.set(history);

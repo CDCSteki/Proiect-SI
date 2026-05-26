@@ -27,67 +27,67 @@ public class StatsService {
     private final InvoiceRepository invoiceRepository;
 
     public UserCountResponse getUsersCountByRole() {
-    return UserCountResponse.builder()
-            .clients(userRepository.countClients())
-            .mechanics(userRepository.countMechanics())
-            .managers(userRepository.countManagers())
-            .admins(userRepository.countAdmins())
-            .build();
-}
+        return UserCountResponse.builder()
+                .clients(userRepository.countClients())
+                .mechanics(userRepository.countMechanics())
+                .managers(userRepository.countManagers())
+                .admins(userRepository.countAdmins())
+                .build();
+    }
 
-public AppointmentStatusResponse getAppointmentsByStatus() {
+    public AppointmentStatusResponse getAppointmentsByStatus() {
         long scheduled = appointmentRepository.countByStatus(Appointment.AppointmentStatus.SCHEDULED);
         long inProgress = appointmentRepository.countByStatus(Appointment.AppointmentStatus.IN_PROGRESS);
         long done = appointmentRepository.countByStatus(Appointment.AppointmentStatus.DONE);
         long readyForPickup = appointmentRepository.countByStatus(Appointment.AppointmentStatus.READY_FOR_PICKUP);
         long cancelled = appointmentRepository.countByStatus(Appointment.AppointmentStatus.CANCELLED);
-        
+
         long total = scheduled + inProgress + done + readyForPickup + cancelled;
         double completionRate = total == 0 ? 0.0 : ((double) (done + readyForPickup) / total) * 100;
 
         return AppointmentStatusResponse.builder()
                 .scheduled(scheduled)
                 .inProgress(inProgress)
-                .done(done)
+                .done(done + readyForPickup)
                 .readyForPickup(readyForPickup)
                 .cancelled(cancelled)
                 .completionRate(completionRate)
                 .build();
     }
 
-public DailyAppointmentsResponse getAppointmentsCount(LocalDateTime start, LocalDateTime end) {
-    Long count = appointmentRepository.countByScheduledAtBetween(start, end);
-    return DailyAppointmentsResponse.builder()
-            .count(count != null ? count : 0L)
-            .build();
-}
+    public DailyAppointmentsResponse getAppointmentsCount(LocalDateTime start, LocalDateTime end) {
+        Long count = appointmentRepository.countByScheduledAtBetween(start, end);
+        return DailyAppointmentsResponse.builder()
+                .count(count != null ? count : 0L)
+                .build();
+    }
 
-public RevenueResponse getTotalRevenue() {
-    BigDecimal total = invoiceRepository.sumPaidInvoices();
-    return RevenueResponse.builder()
-            .total(total != null ? total : BigDecimal.ZERO)
-            .build();
-}
+    public RevenueResponse getTotalRevenue() {
+        BigDecimal total = invoiceRepository.sumPaidInvoices();
+        return RevenueResponse.builder()
+                .total(total != null ? total : BigDecimal.ZERO)
+                .build();
+    }
 
-public RevenueResponse getRevenueByPeriod(LocalDateTime start, LocalDateTime end) {
-    BigDecimal revenue = invoiceRepository.sumPaidInvoicesByPeriod(start, end);
-    return RevenueResponse.builder()
-            .total(revenue != null ? revenue : BigDecimal.ZERO)
-            .build();
-}
+    public RevenueResponse getRevenueByPeriod(LocalDateTime start, LocalDateTime end) {
+        BigDecimal revenue = invoiceRepository.sumPaidInvoicesByPeriod(start, end);
+        return RevenueResponse.builder()
+                .total(revenue != null ? revenue : BigDecimal.ZERO)
+                .build();
+    }
 
-public List<MechanicWorkloadResponse> getMechanicWorkload() {
-    List<Object[]> results = appointmentRepository.countAppointmentsPerMechanic();
-    List<MechanicWorkloadResponse> response = new ArrayList<>();
-    
-    for (Object[] row : results) {
-    response.add(MechanicWorkloadResponse.builder()
-            .mechanicId(UUID.fromString(row[0].toString()))
-            .mechanicName(row[1] + " " + row[2])
-            .appointmentsCount((Long) row[3])
-            .build());
-}
-    
-    return response;
-}
+    public List<MechanicWorkloadResponse> getMechanicWorkload() {
+        List<Object[]> results = appointmentRepository.countAppointmentsPerMechanic();
+        List<MechanicWorkloadResponse> response = new ArrayList<>();
+
+        for (Object[] row : results) {
+            response.add(MechanicWorkloadResponse.builder()
+                    .mechanicId(UUID.fromString(row[0].toString()))
+                    .mechanicName(row[1] + " " + row[2])
+                    .appointmentsCount((Long) row[3])
+                    .build());
+        }
+
+        return response;
+    }
 }

@@ -37,17 +37,14 @@
                   <td class="timetable-cell">
                     <div class="cell-appointments">
                       @for (appt of getAppointmentsForCell(day.dateStr, slot); track appt.id) {
-                        <div class="timetable-card" 
-                             [class]="!appt.mechanicName && appt.status !== 'CANCELLED' ? 'status-unassigned' : 
-                                      appt.status === 'SCHEDULED' ? 'status-scheduled' : 
-                                      appt.status === 'IN_PROGRESS' ? 'status-inprogress' : 
-                                      appt.status === 'DONE' ? 'status-done' : 'status-cancelled'"
+                        <div class="timetable-card"
+                             [class]="getCardClass(appt)"
                              (click)="openAssignModal(appt)">
                           <div class="card-title">{{ appt.car?.make }} {{ appt.car?.model }}</div>
                           <div class="card-service">{{ appt.serviceType }}</div>
                           @if (appt.mechanicName) {
                             <div class="card-mechanic">👤 {{ appt.mechanicName }}</div>
-                          } @else {
+                          } @else if (appt.status !== 'CANCELLED') {
                             <div class="card-unassigned-tag">⚠️ Unassigned</div>
                           }
                         </div>
@@ -75,7 +72,7 @@
           <div class="modal-appt-info">
             <p><strong>{{ appt.car?.make }} {{ appt.car?.model }}</strong> · {{ appt.car?.licensePlate }}</p>
             <p>{{ appt.serviceType }} · {{ appt.scheduledAt | date:'dd MMM, HH:mm' }}</p>
-            
+
             @if (appt.notes) {
               <div class="appt-notes" style="margin-top: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; font-size: 13px; border-left: 3px solid var(--accent);">
                 <strong>Client Notes:</strong> {{ appt.notes }}
@@ -84,7 +81,19 @@
           </div>
 
           <div class="modal-body">
-            @if (appt.mechanicName) {
+            @if (appt.status === 'DONE' || appt.status === 'READY_FOR_PICKUP') {
+              <div style="padding: 20px; text-align: center;">
+                <span class="badge badge-green" style="font-size: 14px; padding: 8px 16px;">
+                  {{ appt.status === 'DONE' ? 'Repair Completed' : 'Ready for Pickup' }}
+                </span>
+              </div>
+            } @else if (appt.status === 'CANCELLED') {
+              <div style="padding: 20px; text-align: center;">
+                <span class="badge" style="font-size: 14px; padding: 8px 16px; background: rgba(255,92,92,.15); color: #ff5c5c; border: 1px solid rgba(255,92,92,.3);">
+                  Cancelled
+                </span>
+              </div>
+            } @else if (appt.mechanicName) {
               <div class="assigned-state" style="padding: 20px; text-align: center;">
                 <span class="badge badge-green" style="font-size: 14px; padding: 8px 16px;">
                   Already assigned to {{ appt.mechanicName }}

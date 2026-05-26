@@ -11,6 +11,7 @@ public class RepairRecordResponse {
     private UUID appointmentId;
     private String diagnosis;
     private BigDecimal laborHours;
+    private BigDecimal laborCost;
     private BigDecimal totalCost;
     private List<PartResponse> parts;
 

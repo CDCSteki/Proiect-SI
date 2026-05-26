@@ -41,6 +41,19 @@ public class AppointmentService {
         if (!car.getClient().getId().equals(clientId)) {
             throw new ForbiddenException("This car does not belong to you");
         }
+
+        // Verifică dacă există deja un appointment activ pentru această mașină
+        boolean hasActiveAppointment = appointmentRepository.findByClientId(clientId)
+                .stream()
+                .anyMatch(a -> a.getCar().getId().equals(request.getCarId())
+                        && a.getStatus() != Appointment.AppointmentStatus.CANCELLED
+                        && a.getStatus() != Appointment.AppointmentStatus.DONE
+                        && a.getStatus() != Appointment.AppointmentStatus.READY_FOR_PICKUP);
+
+        if (hasActiveAppointment) {
+            throw new ConflictException("This car already has an active appointment. Please wait for it to be completed before booking a new one.");
+        }
+
         Appointment appointment = new Appointment();
         appointment.setClient(client);
         appointment.setCar(car);
