@@ -9,13 +9,6 @@ $dark-theme: mat.define-theme((
   )
 ));
 
-$light-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: mat.$blue-palette,
-  )
-));
-
 :root {
   --bg-primary: #0d0f14;
   --bg-secondary: #161a24;
@@ -27,16 +20,6 @@ $light-theme: mat.define-theme((
   --muted: #6b7398;
 }
 
-.light-theme {
-  --bg-primary: #f5f7fa;
-  --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --border: #e0e0e0;
-  --accent: #3d68f0;
-  --accent2: #00b894;
-  --text: #1a1a2e;
-  --muted: #666666;
-}
 
 * {
   box-sizing: border-box;
