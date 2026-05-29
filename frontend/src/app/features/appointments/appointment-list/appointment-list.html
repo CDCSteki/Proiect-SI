@@ -8,16 +8,28 @@
       <a routerLink="/appointments/new" class="btn-primary">+ New Appointment</a>
     </div>
 
-    <div class="filters">
-      @for (status of statuses; track status) {
-        <button
-          class="filter-btn"
-          [class.active]="selectedStatus() === status"
-          (click)="setFilter(status)"
-        >
-          {{ status === 'ALL' ? 'All' : getStatusLabel(status) }}
-        </button>
-      }
+    <div class="filters-container">
+      <div class="filters">
+        @for (status of statuses; track status) {
+          <button
+            class="filter-btn"
+            [class.active]="selectedStatus() === status"
+            (click)="setFilter(status)"
+          >
+            {{ status === 'ALL' ? 'All' : (status === 'READY_FOR_PICKUP' ? 'Ready / Picked Up' : status) }}
+          </button>
+        }
+      </div>
+
+      <div class="car-filter-box">
+        <label for="carFilter">Filter by Vehicle:</label>
+        <select id="carFilter" (change)="onCarFilterChange($event)" class="car-select">
+          <option value="ALL">All Vehicles</option>
+          @for (car of uniqueCars(); track car.id) {
+            <option [value]="car.id">{{ car.make }} {{ car.model }} ({{ car.licensePlate }})</option>
+          }
+        </select>
+      </div>
     </div>
 
     @if (loading()) {
@@ -26,25 +38,25 @@
       <div class="empty-state">
         <span class="empty-icon">📅</span>
         <h3>No appointments found</h3>
-        <p>{{ selectedStatus() === 'ALL' ? 'You have no appointments yet.' : 'No appointments with this status.' }}</p>
-        @if (selectedStatus() === 'ALL') {
+        <p>No appointments match your active filter criteria.</p>
+        @if (selectedStatus() === 'ALL' && selectedCarId() === 'ALL') {
           <a routerLink="/appointments/new" class="btn-primary">Book one now</a>
         }
       </div>
     } @else {
       <div class="appointments-list">
         @for (appt of filteredAppointments(); track appt.id) {
-          <div class="appointment-card">
+          <div class="appointment-card" [class.card-picked-up]="appt.status === 'READY_FOR_PICKUP' && isPickedUp(appt.id)">
             <div class="card-header">
               <div class="car-info">
                 <span class="car-icon">🚗</span>
                 <div>
                   <h3>{{ appt.car.make }} {{ appt.car.model }}</h3>
-                  <p class="car-plate">{{ appt.car.licensePlate }}</p>
+                  <p class="plate">{{ appt.car.licensePlate }}</p>
                 </div>
               </div>
-              <span class="badge" [class]="getStatusClass(appt.status)">
-                {{ getStatusLabel(appt.status) }}
+              <span class="badge {{ getStatusClass(appt.status) }}">
+                {{ getStatusLabel(appt.status, appt.id) }}
               </span>
             </div>
 
@@ -71,17 +83,78 @@
               }
             </div>
 
-            @if (canCancel(appt.status)) {
-              <div class="card-footer">
+            <div class="card-footer">
+              @if (appt.status === 'READY_FOR_PICKUP') {
+                <button class="btn-invoice" (click)="viewInvoice(appt)">📄 View Invoice</button>
+              }
+              @if (canCancel(appt.status)) {
                 <button class="btn-danger" (click)="cancelAppointment(appt.id)">
                   Cancel Appointment
                 </button>
-              </div>
-            }
+              }
+            </div>
           </div>
         }
       </div>
     }
   </div>
+
+  @if (showInvoiceModal()) {
+    <div class="modal-overlay" (click)="showInvoiceModal.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Detailed Service Invoice</h3>
+          <button class="close-btn" (click)="showInvoiceModal.set(false)">✕</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="invoice-preview-sheet">
+            <div class="inv-header-block">
+              <h4>{{ selectedJobDetails()?.car?.make }} {{ selectedJobDetails()?.car?.model }}</h4>
+              <p>License Plate: {{ selectedJobDetails()?.car?.licensePlate }}</p>
+              <p>Service Performed: {{ selectedJobDetails()?.serviceType }}</p>
+            </div>
+
+            @if (selectedInvoice()) {
+              <div class="inv-section">
+                <h4>Diagnostics & Labor</h4>
+                <p style="font-size: 13px; margin-bottom: 8px; color: var(--text); line-height: 1.4;">
+                  {{ selectedInvoice()?.diagnosis }}
+                </p>
+                <div class="inv-row">
+                  <span>Total Labor Time</span>
+                  <span>{{ selectedInvoice()?.laborHours }}h</span>
+                </div>
+              </div>
+
+              @if (selectedInvoice()?.parts?.length > 0) {
+                <div class="inv-section">
+                  <h4>Parts & Components Used</h4>
+                  @for (part of selectedInvoice()?.parts; track part.id) {
+                    <div class="inv-row">
+                      <span>{{ part.name }} x{{ part.quantity }}</span>
+                      <span>{{ part.totalPrice | number:'1.2-2' }} RON</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              <div class="inv-total">
+                <span>Total Invoice Amount</span>
+                <span class="total-val">{{ selectedInvoice()?.totalCost | number:'1.2-2' }} RON</span>
+              </div>
+            } @else {
+              <div class="loading">Fetching secure financial records...</div>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-primary" (click)="showInvoiceModal.set(false)">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
   <app-confirm-dialog />
 </app-main-layout>

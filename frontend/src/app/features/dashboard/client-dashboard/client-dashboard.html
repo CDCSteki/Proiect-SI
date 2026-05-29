@@ -2,90 +2,95 @@
   <div class="dashboard">
     <div class="dashboard-header">
       <div>
-        <p class="greeting">Good morning,</p>
-        <h1>{{ userName() }}</h1>
+        <h1>Welcome back</h1>
       </div>
       <a routerLink="/appointments/new" class="btn-primary">+ New Appointment</a>
     </div>
 
     @if (loading()) {
-      <div class="loading">Loading...</div>
+      <div class="loading">Loading dashboard...</div>
     } @else {
 
-      @if (activeAppointment(); as appt) {
-        <div class="active-card">
-          <div class="active-card-header">
-            <div>
-              <p class="section-label">Active Repair</p>
-              <h3>{{ appt.car.make }} {{ appt.car.model }} · {{ appt.car.licensePlate }}</h3>
-              <p class="active-meta">{{ appt.serviceType }}
-                @if (appt.mechanicName) {
-                  · Mechanic: {{ appt.mechanicName }}
-                }
-              </p>
-            </div>
-            <span class="badge" [class]="getStatusClass(appt.status)">
-              {{ getStatusLabel(appt.status) }}
-            </span>
+      <div class="dashboard-section">
+        <h2 class="section-title">Current Appointments</h2>
+        
+        @if (currentAppointments().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">🚗</span>
+            <h3>No active appointments</h3>
+            <p>All your active services have been processed or you have no open records.</p>
           </div>
-          <div class="timeline">
-            <div class="timeline-step" [class.done]="true">
-              <div class="dot"></div>
-              <div>
-                <p class="step-label">Scheduled</p>
-                <p class="step-time">{{ appt.scheduledAt | date:'dd MMM, HH:mm' }}</p>
+        } @else {
+          <div class="tasks-grid">
+            @for (appt of currentAppointments(); track appt.id) {
+              <div class="task-card" [class.card-ready]="appt.status === 'READY_FOR_PICKUP'">
+                <div class="task-header">
+                  <div>
+                    <span class="badge {{ getStatusClass(appt.status) }}">{{ getStatusLabel(appt.status) }}</span>
+                    <span class="time-tag">🗓️ {{ appt.scheduledAt | date:'dd MMM yyyy, HH:mm' }}</span>
+                  </div>
+                </div>
+                <div class="task-body">
+                  <h3>{{ appt.car.make }} {{ appt.car.model }}</h3>
+                  <p class="plate">{{ appt.car.licensePlate }}</p>
+                  <div class="service-type">🔧 {{ appt.serviceType }}</div>
+                  @if (appt.mechanicName) {
+                    <p class="mechanic-info">⚙️ Assigned Mechanic: {{ appt.mechanicName }}</p>
+                  }
+                </div>
+                
+                <div class="task-actions">
+                  @if (appt.status === 'READY_FOR_PICKUP') {
+                    <button class="btn-invoice" (click)="viewInvoice(appt)">📄 View Invoice</button>
+                    <button class="btn-archive" (click)="acknowledgePickup(appt.id)">✅ Mark as Picked Up</button>
+                  } @else {
+                    <span class="meta-status-info">Operation in progress...</span>
+                  }
+                </div>
               </div>
-            </div>
-            <div class="timeline-step" [class.done]="appt.status === 'IN_PROGRESS' || appt.status === 'DONE'">
-              <div class="dot"></div>
-              <div>
-                <p class="step-label">In Progress</p>
-              </div>
-            </div>
-            <div class="timeline-step" [class.done]="appt.status === 'DONE' || appt.status === 'READY_FOR_PICKUP'">
-              <div class="dot"></div>
-              <div>
-                <p class="step-label">Ready for Pickup</p>
-              </div>
-            </div>
+            }
           </div>
-        </div>
-      } @else {
-        <div class="empty-card">
-          <p>No active appointments.</p>
-          <a routerLink="/appointments/new" class="btn-primary">Book one now</a>
-        </div>
-      }
+        }
+      </div>
 
-      <div class="section">
-        <div class="section-header">
-          <h2>Recent Appointments</h2>
-          <a routerLink="/appointments" class="btn-secondary">View all</a>
-        </div>
-
-        @if (recentAppointments.length === 0) {
-          <div class="empty-state">No past appointments yet.</div>
+      <div class="dashboard-section" style="margin-top: 40px;">
+        <h2 class="section-title">Appointment History</h2>
+        
+        @if (recentAppointments().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">📜</span>
+            <h3>No history records</h3>
+            <p>Your completed or archived appointments will appear in this list.</p>
+          </div>
         } @else {
           <div class="table-wrapper">
             <table>
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Car</th>
+                  <th>Vehicle</th>
                   <th>Service</th>
                   <th>Status</th>
+                  <th style="text-align: right;">Documents</th>
                 </tr>
               </thead>
               <tbody>
                 @for (appt of recentAppointments(); track appt.id) {
                   <tr>
-                    <td>{{ appt.scheduledAt | date:'dd MMM yyyy' }}</td>
-                    <td>{{ appt.car.make }} {{ appt.car.model }}</td>
+                    <td>{{ appt.scheduledAt | date:'dd MMM yyyy, HH:mm' }}</td>
+                    <td><strong>{{ appt.car.make }} {{ appt.car.model }}</strong> <small style="color:var(--muted)">({{ appt.car.licensePlate }})</small></td>
                     <td>{{ appt.serviceType }}</td>
                     <td>
-                      <span class="badge" [class]="getStatusClass(appt.status)">
-                        {{ getStatusLabel(appt.status) }}
+                      <span class="badge {{ getStatusClass(appt.status) }}">
+                        Completed
                       </span>
+                    </td>
+                    <td style="text-align: right;">
+                      @if (appt.status === 'READY_FOR_PICKUP') {
+                        <button class="btn-invoice-action" (click)="viewInvoice(appt)">📄 View Invoice</button>
+                      } @else {
+                        <span style="font-size:12px; color:var(--muted); font-style:italic;">Unavailable</span>
+                      }
                     </td>
                   </tr>
                 }
@@ -98,7 +103,7 @@
       <div class="quick-actions">
         <a routerLink="/cars" class="action-card">
           <span class="action-icon">🚗</span>
-          <span>My Cars</span>
+          <span>My Garage</span>
         </a>
         <a routerLink="/appointments/new" class="action-card">
           <span class="action-icon">📅</span>
@@ -106,9 +111,67 @@
         </a>
         <a routerLink="/profile" class="action-card">
           <span class="action-icon">👤</span>
-          <span>Profile</span>
+          <span>My Profile</span>
         </a>
       </div>
     }
   </div>
+
+  @if (showInvoiceModal()) {
+    <div class="modal-overlay" (click)="showInvoiceModal.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Detailed Service Invoice</h3>
+          <button class="close-btn" (click)="showInvoiceModal.set(false)">✕</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="invoice-preview-sheet">
+            <div class="inv-header-block">
+              <h4>{{ selectedJobDetails()?.car?.make }} {{ selectedJobDetails()?.car?.model }}</h4>
+              <p>License Plate: {{ selectedJobDetails()?.car?.licensePlate }}</p>
+              <p>Service Performed: {{ selectedJobDetails()?.serviceType }}</p>
+            </div>
+
+            @if (selectedInvoice()) {
+              <div class="inv-section">
+                <h4>Diagnostics & Labor</h4>
+                <p style="font-size: 13px; margin-bottom: 8px; color: var(--text); line-height: 1.4;">
+                  {{ selectedInvoice()?.diagnosis }}
+                </p>
+                <div class="inv-row">
+                  <span>Total Labor Time: </span>
+                  <span>{{ selectedInvoice()?.laborHours }}h</span>
+                </div>
+              </div>
+
+              @if (selectedInvoice()?.parts?.length > 0) {
+                <div class="inv-section">
+                  <h4>Parts & Components Used: </h4>
+                  @for (part of selectedInvoice()?.parts; track part.id) {
+                    <div class="inv-row">
+                      <span>{{ part.name }} x{{ part.quantity }}</span>
+                      <span> - </span>
+                      <span>{{ part.totalPrice | number:'1.2-2' }} RON</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              <div class="inv-total">
+                <span>Total Invoice Amount: </span>
+                <span class="total-val">{{ selectedInvoice()?.totalCost | number:'1.2-2' }} RON</span>
+              </div>
+            } @else {
+              <div class="loading">Fetching secure financial records...</div>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-primary" (click)="showInvoiceModal.set(false)">Close</button>
+        </div>
+      </div>
+    </div>
+  }
 </app-main-layout>

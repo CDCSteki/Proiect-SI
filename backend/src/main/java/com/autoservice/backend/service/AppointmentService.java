@@ -109,6 +109,15 @@ public class AppointmentService {
         return mapToResponse(appointment);
     }
 
+    public AppointmentResponse updateStatusByManager(UUID appointmentId, Appointment.AppointmentStatus status) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+
+        appointment.setStatus(status);
+        appointmentRepository.save(appointment);
+        return mapToResponse(appointment);
+    }
+
     public List<AppointmentResponse> getUnassignedAppointments() {
         return appointmentRepository.findByMechanicIsNull()
                 .stream()

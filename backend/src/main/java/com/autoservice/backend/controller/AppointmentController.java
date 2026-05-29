@@ -57,6 +57,14 @@ public class AppointmentController {
             @RequestParam AppointmentStatus status,
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
+
+        boolean isManager = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+
+        if (isManager) {
+            return ResponseEntity.ok(appointmentService.updateStatusByManager(id, status));
+        }
+
         return ResponseEntity.ok(appointmentService.updateStatus(id, status, userId));
     }
 

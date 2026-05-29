@@ -29,13 +29,18 @@ public class RepairRecordService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
 
-        RepairRecord record = new RepairRecord();
-        record.setAppointment(appointment);
+        RepairRecord record = repairRecordRepository.findByAppointmentId(appointmentId)
+                .orElse(new RepairRecord());
+
+        if (record.getId() == null) {
+            record.setAppointment(appointment);
+        }
+
         record.setDiagnosis(request.getDiagnosis());
         record.setLaborHours(request.getLaborHours());
-        record.setTotalCost(BigDecimal.ZERO);
 
         repairRecordRepository.save(record);
+
         return mapToResponse(record);
     }
 

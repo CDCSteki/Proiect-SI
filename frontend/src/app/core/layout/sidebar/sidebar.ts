@@ -54,6 +54,7 @@ export class Sidebar implements OnInit {
         return [
           { path: '/manager/dashboard', label: 'Timetable Grid', icon: '📅' },
           { path: '/manager/appointments', label: 'Unassigned', icon: '🔧' },
+          { path: '/manager/invoices', label: 'Invoices & Billing', icon: '📄' },
           { path: '/manager/leaves', label: 'Leave Requests', icon: '🏖️' },
           { path: '/manager/stats', label: 'Analytics & Stats', icon: '📊' },
           ...common
