@@ -77,7 +77,9 @@
               <label>Labor Hours Spend</label>
               <input type="number" [(ngModel)]="repairForm.laborHours" min="0" step="0.5" />
             </div>
-            <button class="btn-primary" (click)="saveRepairRecord()">Update Base Specs</button>
+            <button class="btn-primary" (click)="saveRepairRecord()">
+  {{ currentRepairRecord() ? 'Update Base Specs' : 'Initialize Repair Sheet' }}
+</button>
           </div>
 
           @if (currentRepairRecord()) {

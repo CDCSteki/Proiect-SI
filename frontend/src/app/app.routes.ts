@@ -40,6 +40,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/stats/manager-stats/manager-stats').then((m) => m.ManagerStats),
   },
   {
+    path: 'manager/invoices',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/invoices/manager-invoices/manager-invoices').then((m) => m.ManagerInvoices),
+  },
+  {
     path: 'mechanic/dashboard',
     canActivate: [authGuard],
     loadComponent: () => import('./features/dashboard/mechanic-dashboard/mechanic-dashboard').then((m) => m.MechanicDashboard),

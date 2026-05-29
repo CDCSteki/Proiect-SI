@@ -17,7 +17,16 @@ export class MechanicLeaves implements OnInit {
   showLeaveModal = signal(false);
   leaveError = signal('');
   leaveForm = { startDate: '', endDate: '', reason: '' };
-
+  private formatToLocalDateTime(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const h = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const s = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${y}-${m}-${d}T${h}:${min}:${s}`;
+  }
   constructor(private mechanicService: MechanicService) {}
 
   ngOnInit(): void {
@@ -35,14 +44,37 @@ export class MechanicLeaves implements OnInit {
   }
 
   submitLeaveRequest(): void {
-    this.leaveError.set('');
-    this.mechanicService.requestLeave(this.leaveForm).subscribe({
-      next: (newLeave) => {
-        this.myLeaves.update(l => [newLeave, ...l]);
+    if (!this.leaveForm.startDate || !this.leaveForm.endDate) {
+      this.leaveError.set('Please select both start and end dates.');
+      return;
+    }
+
+    const start = new Date(this.leaveForm.startDate);
+    const end = new Date(this.leaveForm.endDate);
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    const formattedStartDate = this.formatToLocalDateTime(start);
+    const formattedEndDate = this.formatToLocalDateTime(end);
+
+    const payload = {
+      startDate: formattedStartDate,
+      endDate: formattedEndDate,
+      reason: this.leaveForm.reason
+    };
+
+    this.mechanicService.requestLeave(payload).subscribe({
+      next: () => {
         this.showLeaveModal.set(false);
         this.leaveForm = { startDate: '', endDate: '', reason: '' };
+        this.leaveError.set('');
+        this.loadLeaves(); // reîncarcă lista
       },
-      error: (err) => this.leaveError.set(err.error?.message || 'Failed to submit request.')
+      error: (err) => {
+        this.leaveError.set('Error submitting request. Please try again.');
+        console.error(err);
+      }
     });
   }
 

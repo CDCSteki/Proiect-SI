@@ -23,13 +23,7 @@ export class MechanicUpcoming implements OnInit {
   constructor(private appointmentService: AppointmentService) {}
 
   ngOnInit(): void {
-    this.appointmentService.getMyAppointments().subscribe({
-      next: (tasks) => {
-        this.allTasks.set(tasks);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false)
-    });
+    this.loadTasks();
   }
 
   loadTasks(): void {
