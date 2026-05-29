@@ -66,6 +66,7 @@ public class ProfileService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
                 .role(user.getClass().getSimpleName().toUpperCase())
                 .isActive(user.isActive())
                 .build();
