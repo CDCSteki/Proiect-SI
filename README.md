@@ -1,6 +1,4 @@
-# AutoPulse Backend API
-
-Spring Boot REST API for the AutoPulse Enterprise Management and Scheduling System.
+# AutoPulse
 
 ## Project Description
 AutoPulse is an enterprise-grade web platform specifically designed to centralize, automate, and secure the entire operational cycle of a modern auto repair shop. It resolves fragmented administrative processes by offering:
